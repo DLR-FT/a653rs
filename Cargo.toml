@@ -1,0 +1,14 @@
+[package]
+name = "apex-rs"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sven Friedrich <sven.friedrich@tu-clausthal.de>"]
+license = "MIT OR Apache-2.0"
+keywords = ["hal", "arinc653", "apex"]
+
+[features]
+default = ["strum", "serde"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"], default-features = false, optional = true }
+strum = { version = "0.24", features = ["derive"], default-features = false, optional = true }
