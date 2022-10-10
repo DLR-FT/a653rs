@@ -15,12 +15,14 @@ pub mod basic {
     /// ARINC653P1-5 required functions for Blackboard functionality
     pub trait ApexBlackboardP1 {
         /// Creates new Blackboard
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_blackboard<L: Locked>(
             blackboard_name: BlackboardName,
             max_message_size: MessageSize,
         ) -> Result<BlackboardId, ErrorReturnCode>;
 
         /// Display specified message on Blackboard
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn display_blackboard<L: Locked>(
             blackboard_id: BlackboardId,
             message: &[ApexByte],
@@ -31,6 +33,7 @@ pub mod basic {
         /// # Safety
         ///
         /// This function is safe, as long as the buffer can hold whatever is read
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         unsafe fn read_blackboard<L: Locked>(
             blackboard_id: BlackboardId,
             time_out: ApexSystemTime,
@@ -38,14 +41,17 @@ pub mod basic {
         ) -> Result<MessageSize, ErrorReturnCode>;
 
         /// Clears the Blackboard content
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn clear_blackboard<L: Locked>(blackboard_id: BlackboardId) -> Result<(), ErrorReturnCode>;
 
         /// Get Blackboard Id from a given Name
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_blackboard_id<L: Locked>(
             blackboard_name: BlackboardName,
         ) -> Result<BlackboardId, ErrorReturnCode>;
 
         /// Get Blackboard Status
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_blackboard_status<L: Locked>(
             blackboard_id: BlackboardId,
         ) -> Result<BlackboardStatus, ErrorReturnCode>;

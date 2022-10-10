@@ -11,6 +11,7 @@ pub mod basic {
 
     pub trait ApexBufferP1 {
         // Only during Warm/Cold-Start
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_buffer<L: Locked>(
             buffer_name: BufferName,
             max_message_size: MessageSize,
@@ -18,6 +19,7 @@ pub mod basic {
             queuing_discipline: QueuingDiscipline,
         ) -> Result<BufferId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn send_buffer<L: Locked>(
             buffer_id: BufferId,
             message: &[ApexByte],
@@ -27,14 +29,17 @@ pub mod basic {
         /// # Safety
         ///
         /// This function is safe, as long as the buffer can hold whatever is received
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         unsafe fn receive_buffer<L: Locked>(
             buffer_id: BufferId,
             time_out: ApexSystemTime,
             message: &mut [ApexByte],
         ) -> Result<MessageSize, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_buffer_id<L: Locked>(buffer_name: BufferName) -> Result<BufferId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_buffer_status<L: Locked>(
             buffer_id: BufferId,
         ) -> Result<BufferStatus, ErrorReturnCode>;

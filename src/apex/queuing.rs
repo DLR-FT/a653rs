@@ -21,6 +21,7 @@ pub mod basic {
 
     pub trait ApexQueuingPortP4 {
         // Only during Warm/Cold-Start
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_queuing_port<L: Locked>(
             queuing_port_name: QueuingPortName,
             max_message_size: MessageSize,
@@ -29,6 +30,7 @@ pub mod basic {
             queuing_discipline: QueuingDiscipline,
         ) -> Result<QueuingPortId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn send_queuing_message<L: Locked>(
             queuing_port_id: QueuingPortId,
             message: &[ApexByte],
@@ -38,22 +40,26 @@ pub mod basic {
         /// # Safety
         ///
         /// This function is safe, as long as the buffer can hold whatever is received
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         unsafe fn receive_queuing_message<L: Locked>(
             queuing_port_id: QueuingPortId,
             time_out: ApexSystemTime,
             message: &mut [ApexByte],
         ) -> Result<MessageSize, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_queuing_port_status<L: Locked>(
             queuing_port_id: QueuingPortId,
         ) -> Result<QueuingPortStatus, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn clear_queuing_port<L: Locked>(
             queuing_port_id: QueuingPortId,
         ) -> Result<(), ErrorReturnCode>;
     }
 
     pub trait ApexQueuingPortP1: ApexQueuingPortP4 {
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_queuing_port_id<L: Locked>(
             queuing_port_name: QueuingPortName,
         ) -> Result<QueuingPortId, ErrorReturnCode>;
@@ -313,12 +319,11 @@ pub mod abstraction {
             &mut self,
             name: Name,
             qd: QueuingDiscipline,
-            range: MessageRange,
         ) -> Result<QueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
             let id = Q::create_queuing_port::<Key>(
                 name.into(),
                 MSG_SIZE,
-                range,
+                NB_MSGS,
                 PortDirection::Source,
                 qd,
             )?;
@@ -336,12 +341,11 @@ pub mod abstraction {
             &mut self,
             name: Name,
             qd: QueuingDiscipline,
-            range: MessageRange,
         ) -> Result<QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
             let id = Q::create_queuing_port::<Key>(
                 name.into(),
                 MSG_SIZE,
-                range,
+                NB_MSGS,
                 PortDirection::Destination,
                 qd,
             )?;

@@ -1,7 +1,7 @@
 //! Abstraction Layer for the ARINC653 P1/P2/P4 API
 
 #![no_std]
-#![warn(missing_docs)]
+// #![warn(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
 /// Bindings to Traits which are supposed to be implemented for ARINC653 compliant Hypervisors
@@ -10,6 +10,8 @@ pub mod bindings;
 pub mod prelude;
 
 mod apex;
+
+//TODO pub use macros
 
 // replace all <an APEX integer type> with i64
 

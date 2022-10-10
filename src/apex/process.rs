@@ -141,56 +141,73 @@ pub mod basic {
 
     pub trait ApexProcessP4 {
         // Only during Warm/Cold-Start
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_process<L: Locked>(
             attributes: &ApexProcessAttribute,
         ) -> Result<ProcessId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn start<L: Locked>(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
     }
 
     pub trait ApexProcessP1: ApexProcessP4 {
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn set_priority<L: Locked>(
             process_id: ProcessId,
             priority: Priority,
         ) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn suspend_self<L: Locked>(time_out: ApexSystemTime) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn suspend<L: Locked>(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn resume<L: Locked>(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn stop_self<L: Locked>();
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn stop<L: Locked>(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn delayed_start<L: Locked>(
             process_id: ProcessId,
             delay_time: ApexSystemTime,
         ) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn lock_preemption<L: Locked>() -> Result<LockLevel, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn unlock_preemption<L: Locked>() -> Result<LockLevel, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_my_id<L: Locked>() -> Result<ProcessId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_process_id<L: Locked>(
             process_name: ProcessName,
         ) -> Result<ProcessId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_process_status<L: Locked>(
             process_id: ProcessId,
         ) -> Result<ApexProcessStatus, ErrorReturnCode>;
 
         // Only during Warm/Cold-Start
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn initialize_process_core_affinity<L: Locked>(
             process_id: ProcessId,
             processor_core_id: ProcessorCoreId,
         ) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_my_processor_core_id<L: Locked>() -> ProcessorCoreId;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_my_index<L: Locked>() -> Result<ProcessIndex, ErrorReturnCode>;
     }
 }

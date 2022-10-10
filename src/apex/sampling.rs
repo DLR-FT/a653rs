@@ -31,6 +31,7 @@ pub mod basic {
 
     pub trait ApexSamplingPortP4 {
         // Only during Warm/Cold-Start
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_sampling_port<L: Locked>(
             sampling_port_name: SamplingPortName,
             max_message_size: MessageSize,
@@ -38,6 +39,7 @@ pub mod basic {
             refresh_period: ApexSystemTime,
         ) -> Result<SamplingPortId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn write_sampling_message<L: Locked>(
             sampling_port_id: SamplingPortId,
             message: &[ApexByte],
@@ -46,6 +48,7 @@ pub mod basic {
         /// # Safety
         ///
         /// This function is safe, as long as the buffer can hold whatever is received
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         unsafe fn read_sampling_message<L: Locked>(
             sampling_port_id: SamplingPortId,
             message: &mut [ApexByte],
@@ -53,10 +56,12 @@ pub mod basic {
     }
 
     pub trait ApexSamplingPortP1: ApexSamplingPortP4 {
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_sampling_port_id<L: Locked>(
             sampling_port_name: SamplingPortName,
         ) -> Result<SamplingPortId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_sampling_port_status<L: Locked>(
             sampling_port_id: SamplingPortId,
         ) -> Result<ApexSamplingPortStatus, ErrorReturnCode>;

@@ -2,12 +2,16 @@ pub mod basic {
     use crate::bindings::*;
 
     pub trait ApexTimeP4 {
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn periodic_wait() -> Result<(), ErrorReturnCode>;
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_time() -> ApexSystemTime;
     }
 
     pub trait ApexTimeP1: ApexTimeP4 {
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn timed_wait<L: Locked>(delay_time: ApexSystemTime);
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn replenish<L: Locked>(budget_time: ApexSystemTime) -> Result<(), ErrorReturnCode>;
     }
 }

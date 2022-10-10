@@ -27,19 +27,25 @@ pub mod basic {
 
     pub trait ApexEventP1 {
         // Only during Warm/Cold-Start
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_event<L: Locked>(event_name: EventName) -> Result<EventId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn set_event<L: Locked>(event_id: EventId) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn reset_event<L: Locked>(event_id: EventId) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn wait_event<L: Locked>(
             event_id: EventId,
             time_out: ApexSystemTime,
         ) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_event_id<L: Locked>(event_name: EventName) -> Result<EventId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_event_status<L: Locked>(event_id: EventId) -> Result<EventStatus, ErrorReturnCode>;
     }
 }
