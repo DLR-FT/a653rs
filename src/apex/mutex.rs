@@ -36,28 +36,35 @@ pub mod basic {
     ///  take a [`ProcessId`] and hence need working process functionalities
     pub trait ApexMutexP1: ApexProcessP4 {
         // Only during Warm/Cold-Start
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_mutex<L: Locked>(
             mutex_name: MutexName,
             mutex_priority: Priority,
             queuing_discipline: QueuingDiscipline,
         ) -> Result<MutexId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn acquire_mutex<L: Locked>(
             mutex_id: MutexId,
             time_out: ApexSystemTime,
         ) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn release_mutex<L: Locked>(mutex_id: MutexId) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn reset_mutex<L: Locked>(
             mutex_id: MutexId,
             process_id: ProcessId,
         ) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_mutex_id<L: Locked>(mutex_name: MutexName) -> Result<MutexId, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_mutex_status<L: Locked>(mutex_id: MutexId) -> Result<MutexStatus, ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_process_mutex_state<L: Locked>(
             process_id: ProcessId,
         ) -> Result<MutexId, ErrorReturnCode>;

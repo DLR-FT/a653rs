@@ -6,6 +6,7 @@ pub mod basic {
     pub type MemoryBlockAddress = *mut u8;
 
     pub trait ApexMemoryBlockP2 {
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_memory_block_status<L: Locked>(
             memory_block_name: MemoryBlockName,
         ) -> Result<ApexMemoryBlockStatus, ErrorReturnCode>;

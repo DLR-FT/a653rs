@@ -75,8 +75,10 @@ pub mod basic {
 
     pub trait ApexPartitionP4 {
         // As stated in ARINC653P1-5 3.2.2.1, this never fails
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_partition_status<L: Locked>() -> ApexPartitionStatus;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn set_partition_mode<L: Locked>(
             operating_mode: OperatingMode,
         ) -> Result<(), ErrorReturnCode>;

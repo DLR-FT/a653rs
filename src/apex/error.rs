@@ -44,10 +44,12 @@ pub mod basic {
     }
 
     pub trait ApexErrorP4 {
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn report_application_message<L: Locked>(
             message: &[ApexByte],
         ) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn raise_application_error<L: Locked>(
             error_code: ErrorCode,
             message: &[ApexByte],
@@ -56,14 +58,17 @@ pub mod basic {
 
     pub trait ApexErrorP1 {
         // Only during Warm/Cold-Start
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_error_handler<L: Locked>(
             entry_point: SystemAddress,
             stack_size: StackSize,
         ) -> Result<(), ErrorReturnCode>;
 
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_error_status<L: Locked>() -> Result<ErrorStatus, ErrorReturnCode>;
 
         // Only during Warm/Cold-Start
+        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn configure_error_handler<L: Locked>(
             concurrency_control: ErrorHandlerConcurrencyControl,
             processor_core_id: ProcessorCoreId,
@@ -81,7 +86,7 @@ pub mod abstraction {
     use crate::prelude::*;
 
     pub trait ApexErrorP4Ext: ApexErrorP4 {
-        fn report_message(message: &[ApexByte]) -> Result<(), Error>;
+        fn report_application_message(message: &[ApexByte]) -> Result<(), Error>;
 
         fn raise_application_error(message: &[ApexByte]) -> Result<(), Error>;
     }
@@ -91,7 +96,7 @@ pub mod abstraction {
     }
 
     impl<E: ApexErrorP4> ApexErrorP4Ext for E {
-        fn report_message(message: &[ApexByte]) -> Result<(), Error> {
+        fn report_application_message(message: &[ApexByte]) -> Result<(), Error> {
             E::report_application_message::<Key>(WriteError::validate(
                 MAX_ERROR_MESSAGE_SIZE as u32,
                 message,

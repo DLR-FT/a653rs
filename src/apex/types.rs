@@ -271,7 +271,7 @@ pub mod abstraction {
 
     impl Name {
         /// Create new [Name] from [ApexName]
-        pub fn new(name: ApexName) -> Self {
+        pub const fn new(name: ApexName) -> Self {
             Name(name)
         }
 
@@ -304,7 +304,7 @@ pub mod abstraction {
             if s.len() > MAX_NAME_LENGTH {
                 return Err(s.len() as ApexUnsigned);
             }
-            let mut array_name = [0; MAX_NAME_LENGTH as usize];
+            let mut array_name = [0; MAX_NAME_LENGTH];
             array_name[..s.len()].copy_from_slice(s.as_bytes());
             Ok(Self(array_name))
         }

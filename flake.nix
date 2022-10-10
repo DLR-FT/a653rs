@@ -12,7 +12,7 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-            overlays = [ devshell.overlay ];
+            overlays = [ devshell.overlays.default ];
           };
           rust-toolchain = with fenix.packages.${system};
             combine [
@@ -20,6 +20,7 @@
               stable.cargo
               stable.clippy
               latest.rustfmt
+              # rust-analyzer
               targets.thumbv6m-none-eabi.stable.rust-std
             ];
         in
@@ -30,16 +31,25 @@
             packages = with pkgs; [
               clang
               rust-toolchain
-              rust-analyzer
               cargo-outdated
               cargo-udeps
               cargo-audit
+              cargo-expand
+              cargo-all-features
               cargo-watch
               nixpkgs-fmt
+              rust-analyzer
             ];
             git.hooks = {
               enable = true;
               pre-commit.text = ''
+                # echo "Build all feature combinations:"
+                # RUSTFLAGS=-Awarnings verify-features
+                # echo "Build no_std:"
+                # RUSTFLAGS=-Awarnings verify-no_std -q
+                # echo "Build documentation:"
+                # RUSTFLAGS=-Awarnings verify-doc -q
+                # echo "Run 'nix flake check'"
                 nix flake check
               '';
             };
@@ -65,10 +75,18 @@
                 help = pkgs.cargo-audit.meta.description;
               }
               {
+                name = "expand";
+                command = ''
+                  PATH=${fenix.packages.${system}.latest.rustc}/bin:$PATH
+                  cargo expand $@
+                '';
+                help = pkgs.cargo-expand.meta.description;
+              }
+              {
                 name = "verify-no_std";
                 command = ''
                   cd $PRJ_ROOT
-                  cargo build --target thumbv6m-none-eabi --features strum,serde
+                  cargo build --target thumbv6m-none-eabi --all-features $@
                 '';
                 help =
                   "Verify that the library builds for no_std without std-features";
@@ -78,10 +96,20 @@
                 name = "verify-doc";
                 command = ''
                   cd $PRJ_ROOT
-                  cargo doc --features strum,serde
+                  cargo doc --features strum,serde $@
                 '';
                 help =
                   "Verify that the documentation builds without problems";
+                category = "test";
+              }
+              {
+                name = "verify-features";
+                command = ''
+                  cd $PRJ_ROOT
+                  cargo check-all-features -q $@
+                '';
+                help =
+                  "Verify that apex_rs builds for all feature combinations";
                 category = "test";
               }
             ];
