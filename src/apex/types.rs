@@ -58,12 +58,13 @@ pub mod basic {
         pub fn from(from: ReturnCode) -> Result<(), Self> {
             use ErrorReturnCode::*;
             match from {
-                1 => Ok(()),
-                2 => Err(NoAction),
-                3 => Err(NotAvailable),
-                4 => Err(InvalidParam),
-                5 => Err(InvalidConfig),
-                6 => Err(InvalidMode),
+                0 => Ok(()),
+                1 => Err(NoAction),
+                2 => Err(NotAvailable),
+                3 => Err(InvalidParam),
+                4 => Err(InvalidConfig),
+                5 => Err(InvalidMode),
+                6 => Err(TimedOut),
                 unexpected => panic!("{unexpected}"),
             }
         }
