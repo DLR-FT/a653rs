@@ -296,7 +296,8 @@ pub mod abstraction {
                 // use random non-zero duration.
                 // while refresh_period is ignored for the source
                 //  it may produce an error if set to zero
-                SystemTime::Normal(Duration::from_nanos(1)).into(),
+                // XNG 1.4 needs 2000 nanos for some reason
+                SystemTime::Normal(Duration::from_nanos(2000)).into(),
             )?;
             Ok(SamplingPortSource {
                 _b: Default::default(),
