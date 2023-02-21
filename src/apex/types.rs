@@ -135,7 +135,9 @@ pub mod abstraction {
     use core::time::Duration;
 
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexByte, ApexUnsigned, MessageSize, MAX_NAME_LENGTH};
+    pub use super::basic::{
+        ApexByte, ApexUnsigned, MessageSize, QueuingDiscipline, MAX_NAME_LENGTH,
+    };
     use crate::bindings::*;
 
     /// Error Type used by abstracted functions.  
