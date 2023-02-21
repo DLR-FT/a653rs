@@ -136,7 +136,7 @@ pub mod abstraction {
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{
-        ApexByte, ApexUnsigned, MessageSize, QueuingDiscipline, MAX_NAME_LENGTH,
+        ApexByte, ApexUnsigned, MessageRange, MessageSize, QueuingDiscipline, MAX_NAME_LENGTH,
     };
     use crate::bindings::*;
 
