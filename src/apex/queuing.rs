@@ -94,7 +94,7 @@ pub mod abstraction {
     pub trait ApexQueuingPortP4Ext: ApexQueuingPortP4 + Sized {
         fn queueing_port_send_unchecked(
             id: QueuingPortId,
-            buffer: &mut [ApexByte],
+            buffer: &[ApexByte],
             timeout: SystemTime,
         ) -> Result<(), Error>;
 
@@ -127,7 +127,7 @@ pub mod abstraction {
     impl<Q: ApexQueuingPortP4> ApexQueuingPortP4Ext for Q {
         fn queueing_port_send_unchecked(
             id: QueuingPortId,
-            buffer: &mut [ApexByte],
+            buffer: &[ApexByte],
             timeout: SystemTime,
         ) -> Result<(), Error> {
             Q::send_queuing_message::<Key>(id, buffer, timeout.into())?;
@@ -221,7 +221,7 @@ pub mod abstraction {
     impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4>
         QueuingPortSender<MSG_SIZE, NB_MSGS, Q>
     {
-        pub fn send(&self, buffer: &mut [ApexByte], timeout: SystemTime) -> Result<(), Error> {
+        pub fn send(&self, buffer: &[ApexByte], timeout: SystemTime) -> Result<(), Error> {
             WriteError::validate(MSG_SIZE, buffer)?;
             Q::queueing_port_send_unchecked(self.id, buffer, timeout)
         }
