@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use darling::{FromAttributes, FromMeta};
 use proc_macro2::Ident;
+use quote::format_ident;
 use strum::{Display, EnumDiscriminants, EnumIter, EnumString};
 // use strum::{Display, EnumString, EnumVariantNames, VariantNames};
 use syn::{parse_quote, spanned::Spanned, Attribute, Item, Type};
@@ -26,6 +27,8 @@ impl FromMeta for QueuingDiscipline {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(sampling_out))]
 pub struct SamplingOutProc {
+    #[darling(default = "String::default")]
+    pub name: String,
     pub msg_size: WrappedByteSize,
 }
 
@@ -43,6 +46,8 @@ impl MayFromAttributes for SamplingOutProc {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(sampling_in))]
 pub struct SamplingInProc {
+    #[darling(default = "String::default")]
+    pub name: String,
     pub msg_size: WrappedByteSize,
     pub refresh_period: WrappedDuration,
 }
@@ -61,6 +66,8 @@ impl MayFromAttributes for SamplingInProc {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(queuing_out))]
 pub struct QueuingOutProc {
+    #[darling(default = "String::default")]
+    pub name: String,
     pub msg_size: WrappedByteSize,
     pub msg_count: usize,
     pub discipline: QueuingDiscipline,
@@ -80,6 +87,8 @@ impl MayFromAttributes for QueuingOutProc {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(queuing_in))]
 pub struct QueuingInProc {
+    #[darling(default = "String::default")]
+    pub name: String,
     pub msg_size: WrappedByteSize,
     pub msg_count: usize,
     pub discipline: QueuingDiscipline,
@@ -106,12 +115,25 @@ pub enum Channel {
 }
 
 impl Channel {
+    /// Used for identifying this channel in contexts and its `mod`
+    pub fn ident(&self) -> Ident {
+        match self {
+            Channel::SamplingOut(ident, _) => ident.clone(),
+            Channel::SamplingIn(ident, _) => ident.clone(),
+            Channel::QueuingOut(ident, _) => ident.clone(),
+            Channel::QueuingIn(ident, _) => ident.clone(),
+        }
+    }
+
+    /// Solely used for the static name
     pub fn name(&self) -> Ident {
         match self {
-            Channel::SamplingOut(name, _) => name.clone(),
-            Channel::SamplingIn(name, _) => name.clone(),
-            Channel::QueuingOut(name, _) => name.clone(),
-            Channel::QueuingIn(name, _) => name.clone(),
+            Channel::SamplingOut(ident, port) => {
+                format_ident!("{}", port.name, span = ident.span())
+            }
+            Channel::SamplingIn(ident, ch) => format_ident!("{}", ch.name, span = ident.span()),
+            Channel::QueuingOut(ident, ch) => format_ident!("{}", ch.name, span = ident.span()),
+            Channel::QueuingIn(ident, ch) => format_ident!("{}", ch.name, span = ident.span()),
         }
     }
 
@@ -145,14 +167,38 @@ impl Channel {
             .filter_map(|item| match item {
                 Item::Struct(mut item) => {
                     let mut vec: Vec<Option<darling::Result<Channel>>> = vec![
-                        SamplingOutProc::may_from_attributes(&mut item.attrs)
-                            .map(|x| x.map(|x| Channel::SamplingOut(item.ident.clone(), x))),
-                        SamplingInProc::may_from_attributes(&mut item.attrs)
-                            .map(|x| x.map(|x| Channel::SamplingIn(item.ident.clone(), x))),
-                        QueuingOutProc::may_from_attributes(&mut item.attrs)
-                            .map(|x| x.map(|x| Channel::QueuingOut(item.ident.clone(), x))),
-                        QueuingInProc::may_from_attributes(&mut item.attrs)
-                            .map(|x| x.map(|x| Channel::QueuingIn(item.ident.clone(), x))),
+                        SamplingOutProc::may_from_attributes(&mut item.attrs).map(|x| {
+                            x.map(|mut x| {
+                                if x.name.is_empty() {
+                                    x.name = item.ident.to_string();
+                                }
+                                Channel::SamplingOut(item.ident.clone(), x)
+                            })
+                        }),
+                        SamplingInProc::may_from_attributes(&mut item.attrs).map(|x| {
+                            x.map(|mut x| {
+                                if x.name.is_empty() {
+                                    x.name = item.ident.to_string();
+                                }
+                                Channel::SamplingIn(item.ident.clone(), x)
+                            })
+                        }),
+                        QueuingOutProc::may_from_attributes(&mut item.attrs).map(|x| {
+                            x.map(|mut x| {
+                                if x.name.is_empty() {
+                                    x.name = item.ident.to_string();
+                                }
+                                Channel::QueuingOut(item.ident.clone(), x)
+                            })
+                        }),
+                        QueuingInProc::may_from_attributes(&mut item.attrs).map(|x| {
+                            x.map(|mut x| {
+                                if x.name.is_empty() {
+                                    x.name = item.ident.to_string();
+                                }
+                                Channel::QueuingIn(item.ident.clone(), x)
+                            })
+                        }),
                     ];
                     let vec: Vec<_> = vec
                         .drain(..)

@@ -11,7 +11,7 @@ use crate::parse::channel::Channel;
 
 impl Channel {
     pub fn gen_snake_ident(&self) -> Ident {
-        let name = self.name();
+        let name = self.ident();
         format_ident!(
             "{}",
             name.to_string().to_case(Case::Snake),
@@ -26,13 +26,13 @@ impl Channel {
         }
     }
 
-    pub fn gen_init_fn(&self) -> ItemImpl {
+    pub fn gen_create_fn(&self) -> ItemImpl {
         let name = self.gen_snake_ident();
-        let init_name = format_ident!("init_{name}");
+        let create_name = format_ident!("create_{name}");
         let create_channel_call = self.gen_create_channel_call();
         parse_quote! {
             impl<'a> super:: StartContext<'a, Hypervisor> {
-                pub fn #init_name(&mut self) -> Result<(), Error>{
+                pub fn #create_name(&mut self) -> Result<(), Error>{
                     use core::str::FromStr;
                     let channel = self.ctx. #create_channel_call ?;
                     // This is safe because during cold/warm start only one thread works
@@ -91,13 +91,13 @@ impl Channel {
         let name = self.gen_snake_ident();
         let static_name = self.gen_static_name()?;
         let static_value = self.gen_static_value();
-        let init_fn = self.gen_init_fn();
+        let create_fn = self.gen_create_fn();
         Ok(parse_quote! {
             mod #name {
                 use super::Hypervisor;
                 use apex_rs::prelude::*;
 
-                #init_fn
+                #create_fn
                 #static_name
                 #static_value
             }

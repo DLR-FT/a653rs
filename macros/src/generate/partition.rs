@@ -39,16 +39,6 @@ impl Partition {
         }
     }
 
-    // /// Generate all process init functions
-    // fn init_process_fns(&self) -> impl Iterator<Item = ItemFn> + '_ {
-    //     self.processes.iter().map(Process::gen_init_fn)
-    // }
-
-    // /// Generate all channel init functions
-    // fn init_channel_fns(&self) -> impl Iterator<Item = ItemFn> + '_ {
-    //     self.channel.iter().map(Channel::gen_init_fn)
-    // }
-
     pub fn gen_struct(&self) -> ItemStruct {
         parse_quote! {
             pub struct Partition;

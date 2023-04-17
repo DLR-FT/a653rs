@@ -3,6 +3,7 @@ use std::string::ToString;
 
 use bytesize::ByteSize;
 use darling::{FromAttributes, FromMeta};
+use quote::format_ident;
 use strum::{Display, EnumString, EnumVariantNames, VariantNames};
 use syn::spanned::Spanned;
 use syn::{Attribute, Ident, Item};
@@ -55,6 +56,8 @@ impl FromMeta for Deadline {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(aperiodic))]
 pub struct Aperiodic {
+    #[darling(default = "String::default")]
+    name: String,
     time_capacity: SystemTime,
     stack_size: WrappedByteSize,
     base_priority: i32,
@@ -75,6 +78,8 @@ impl MayFromAttributes for Aperiodic {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(periodic))]
 pub struct Periodic {
+    #[darling(default = "String::default")]
+    name: String,
     time_capacity: SystemTime,
     period: WrappedDuration,
     stack_size: WrappedByteSize,
@@ -95,7 +100,10 @@ impl MayFromAttributes for Periodic {
 
 #[derive(Debug, Clone)]
 pub struct Process {
+    /// Solely used for the static name
     pub name: Ident,
+    /// Used for identifying this process in contexts and its `mod`
+    pub ident: Ident,
     pub time_capacity: SystemTime,
     pub period: SystemTime,
     pub stack_size: ByteSize,
@@ -104,7 +112,12 @@ pub struct Process {
 }
 
 impl Process {
-    fn from_aperiodic(name: Ident, a: Aperiodic) -> Self {
+    fn from_aperiodic(ident: Ident, a: Aperiodic) -> Self {
+        let name = if a.name.is_empty() {
+            ident.clone()
+        } else {
+            format_ident!("{}", a.name, span = ident.span())
+        };
         Process {
             time_capacity: a.time_capacity,
             period: SystemTime::Infinite,
@@ -112,10 +125,16 @@ impl Process {
             base_priority: a.base_priority,
             deadline: a.deadline,
             name,
+            ident,
         }
     }
 
-    fn from_periodic(name: Ident, p: Periodic) -> Self {
+    fn from_periodic(ident: Ident, p: Periodic) -> Self {
+        let name = if p.name.is_empty() {
+            ident.clone()
+        } else {
+            format_ident!("{}", p.name, span = ident.span())
+        };
         Process {
             time_capacity: p.time_capacity,
             period: SystemTime::Normal(p.period.into()),
@@ -123,6 +142,7 @@ impl Process {
             base_priority: p.base_priority,
             deadline: p.deadline,
             name,
+            ident,
         }
     }
 

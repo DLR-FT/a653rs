@@ -4,7 +4,7 @@ mod deps;
 
 #[partition(crate::deps::dummy::Dummy)]
 mod hello {
-    #[sampling_out(msg_size = "10KB")]
+    #[sampling_out(name = "Ch1", msg_size = "10KB")]
     struct Channel1;
 
     #[sampling_in(refresh_period = "500ms")]
@@ -21,17 +21,17 @@ mod hello {
 
     #[start(warm)]
     fn warm_start(mut ctx: start::Context) {
-        ctx.init_aperiodic2().unwrap();
-        ctx.init_periodic3().unwrap();
-        ctx.init_periodic3().unwrap();
-        ctx.init_channel_1().unwrap();
-        ctx.init_channel_two().unwrap();
+        ctx.create_aperiodic2().unwrap().start().unwrap();
+        ctx.create_periodic3().unwrap().start().unwrap();
+        ctx.create_channel_1().unwrap();
+        ctx.create_channel_two().unwrap();
 
         // Maybe we do not always want to initialize channel3
-        // ctx.init_channel_3().unwrap();
+        // ctx.create_channel_3().unwrap();
     }
 
     #[aperiodic(
+        name = "ap2",
         time_capacity = "Infinite",
         stack_size = "10KB",
         base_priority = 1,

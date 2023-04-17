@@ -9,7 +9,7 @@ use crate::parse::process::Process;
 
 impl Process {
     fn gen_wrapper_fn(&self) -> ItemFn {
-        let name = &self.name;
+        let ident = &self.ident;
         parse_quote! {
             pub(super) extern "C" fn wrapper () {
                 let proc_self;
@@ -17,13 +17,13 @@ impl Process {
                     proc_self = VALUE.as_ref().unwrap();
                 }
                 let ctx = Context::new(proc_self);
-                super:: #name(ctx)
+                super:: #ident(ctx)
             }
         }
     }
 
-    pub fn gen_init_fn(&self) -> ItemImpl {
-        let init_name = format_ident!("init_{}", self.name);
+    pub fn gen_create_fn(&self) -> ItemImpl {
+        let create_ident = format_ident!("create_{}", self.ident);
         let deadline: ExprPath = self.deadline.into();
         let priority = self.base_priority;
         let stack_size = self.stack_size.as_u64() as u32;
@@ -31,7 +31,7 @@ impl Process {
         let period: TokenStream = self.period.clone().into();
         parse_quote! {
             impl<'a> super:: StartContext<'a, Hypervisor> {
-                pub fn #init_name(&mut self) -> Result<(), Error>{
+                pub fn #create_ident<'b>(&'b mut self) -> Result<&'b Process::<Hypervisor>, Error>{
                     // use apex_rs::bindings::ApexProcessP4;
                     use core::str::FromStr;
                     let attr =  ProcessAttribute {
@@ -47,8 +47,8 @@ impl Process {
                     // This is safe because during cold/warm start only one thread works
                     unsafe {
                         VALUE = Some( process );
+                        Ok(VALUE.as_ref().unwrap())
                     }
-                    Ok(())
                 }
             }
         }
@@ -81,21 +81,21 @@ impl Process {
     }
 
     pub fn gen_process_mod(&self) -> syn::Result<ItemMod> {
-        let name = &self.name;
+        let ident = &self.ident;
         let wrapper = self.gen_wrapper_fn();
         let static_name = self.gen_static_name()?;
         let static_value = self.gen_static_value();
-        let init_fn = self.gen_init_fn();
+        let create_fn = self.gen_create_fn();
         let context_ident = Context::from_process(self).get_context_ident();
         Ok(parse_quote! {
-            mod #name {
+            mod #ident {
                 use apex_rs::prelude::*;
                 use super::Hypervisor;
 
                 pub(super) type Context<'a> = super:: #context_ident <'a, Hypervisor> ;
 
                 #wrapper
-                #init_fn
+                #create_fn
                 #static_name
                 #static_value
             }

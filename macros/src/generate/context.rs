@@ -77,7 +77,7 @@ impl Context {
                     Self{
                         _p: core::marker::PhantomData::default(),
                         proc_self,
-                        #(#field_names: unsafe{& #field_names::VALUE}),*
+                        #(#field_names: unsafe{ #field_names::VALUE.as_ref() }),*
                     }
                 }
             }
@@ -87,7 +87,9 @@ impl Context {
     }
 
     fn gen_extension(&self) -> impl Iterator<Item = ItemImpl> {
-        self.gen_time().chain(self.gen_error())
+        std::iter::once(self.gen_partition())
+            .chain(self.gen_time())
+            .chain(self.gen_error())
     }
 
     fn gen_all_extensions() -> impl Iterator<Item = ItemImpl> {
@@ -106,24 +108,24 @@ impl Context {
 impl Partition {
     pub fn gen_context_process_fields(&self) -> impl Iterator<Item = Field> + '_ {
         self.processes.iter().map(|p| {
-            let name = &p.name;
+            let ident = &p.ident;
             Field::parse_named
-                .parse2(quote!(#name: &'a Option<Process<Hypervisor>>))
+                .parse2(quote!(#ident: Option<&'a Process<Hypervisor>>))
                 .unwrap()
         })
     }
 
     pub fn gen_context_channel_fields(&self) -> impl Iterator<Item = Field> + '_ {
         self.channel.iter().map(|c| {
-            let name = &c.name();
-            let name = format_ident!(
+            let ident = &c.ident();
+            let ident = format_ident!(
                 "{}",
-                name.to_string().to_case(Case::Snake),
-                span = name.span()
+                ident.to_string().to_case(Case::Snake),
+                span = ident.span()
             );
             let typ = c.typ();
             Field::parse_named
-                .parse2(quote!(#name: &'a Option< #typ >))
+                .parse2(quote!(#ident: Option< &'a #typ >))
                 .unwrap()
         })
     }
