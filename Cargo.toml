@@ -9,6 +9,7 @@ keywords = ["hal", "arinc653", "apex"]
 [features]
 default = ["strum", "serde"]
 full_doc = []
+macros = [ "apex_rs_macros" ]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"], default-features = false, optional = true }
