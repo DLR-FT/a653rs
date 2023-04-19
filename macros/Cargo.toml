@@ -1,5 +1,5 @@
 [package]
-name = "apex_rs_macros"
+name = "apex-rs-macros"
 version = "0.1.0"
 edition = "2021"
 authors = ["Sven Friedrich <sven.friedrich@tu-clausthal.de>"]

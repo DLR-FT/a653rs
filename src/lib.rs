@@ -11,10 +11,9 @@ pub mod prelude;
 
 mod apex;
 
-#[cfg(feature = "apex_rs_macros")]
-pub mod macros {
-    pub use apex_rs_macros::*;
-}
+#[cfg(feature = "macros")]
+#[cfg_attr(feature = "macros", macro_use)]
+pub use apex_rs_macros::*;
 
 // replace all <an APEX integer type> with i64
 

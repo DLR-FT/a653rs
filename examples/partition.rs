@@ -1,6 +1,11 @@
+use apex_rs::prelude::PartitionExt;
 use apex_rs_macros::partition;
 
 mod deps;
+
+fn main() {
+    hello::Partition.run();
+}
 
 #[partition(crate::deps::dummy::Dummy)]
 mod hello {

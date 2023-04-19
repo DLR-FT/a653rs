@@ -6,6 +6,7 @@ mod generate;
 mod parse;
 mod partition;
 
+/// TODO documentation
 #[proc_macro_attribute]
 pub fn partition(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemMod);

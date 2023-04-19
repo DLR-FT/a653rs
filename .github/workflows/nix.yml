@@ -29,6 +29,8 @@ jobs:
         command:
           - verify-no_std
           - verify-doc
+          - verify-features
+          - verify-examples
     steps:
       - uses: actions/checkout@v2
       - uses: cachix/install-nix-action@v13

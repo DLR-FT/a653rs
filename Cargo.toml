@@ -9,12 +9,19 @@ keywords = ["hal", "arinc653", "apex"]
 [features]
 default = ["strum", "serde"]
 full_doc = []
-macros = [ "apex_rs_macros" ]
+macros = [ "apex-rs-macros" ]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"], default-features = false, optional = true }
 strum = { version = "0.24", features = ["derive"], default-features = false, optional = true }
-apex_rs_macros = { path = "macros", optional = true }
+apex-rs-macros = { path = "macros", optional = true }
 
 [dev-dependencies]
-apex_rs_macros = { path = "macros" }
+apex-rs-macros = { path = "macros" }
+
+[workspace]
+members = [ "macros" ]
+
+[package.metadata.cargo-all-features]
+# macros is the same feature as apex-rs-macros
+denylist = ["apex-rs-macros"]

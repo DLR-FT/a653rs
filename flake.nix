@@ -86,7 +86,7 @@
                 name = "verify-no_std";
                 command = ''
                   cd $PRJ_ROOT
-                  cargo build --target thumbv6m-none-eabi --all-features $@
+                  cargo check-all-features --target thumbv6m-none-eabi $@
                 '';
                 help =
                   "Verify that the library builds for no_std without std-features";
@@ -96,7 +96,8 @@
                 name = "verify-doc";
                 command = ''
                   cd $PRJ_ROOT
-                  cargo doc --features strum,serde $@
+                  cargo doc --all-features $@
+                  cargo doc --no-default-features $@
                 '';
                 help =
                   "Verify that the documentation builds without problems";
@@ -106,7 +107,17 @@
                 name = "verify-features";
                 command = ''
                   cd $PRJ_ROOT
-                  cargo check-all-features -q $@
+                  cargo check-all-features $@
+                '';
+                help =
+                  "Verify that apex_rs builds for all feature combinations";
+                category = "test";
+              }
+              {
+                name = "verify-examples";
+                command = ''
+                  cd $PRJ_ROOT
+                  cargo check-all-features --examples $@
                 '';
                 help =
                   "Verify that apex_rs builds for all feature combinations";
