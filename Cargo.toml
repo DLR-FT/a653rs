@@ -11,7 +11,7 @@ keywords = [
   "embedded",
   "no_std",
 ]
-description = "Aring653 abstraction library for hypervisor independent partition programming"
+description = "Arinc653 abstraction library for hypervisor independent partition programming"
 categories = [
   "aerospace", 
   "api-bindings",
@@ -37,5 +37,5 @@ a653rs_macros = { version = "0.2.0", path = "macros" }
 members = [ "macros" ]
 
 [package.metadata.cargo-all-features]
-# macros is the same feature as apex-rs-macros
+# macros is the same feature as a653rs-macros
 denylist = ["a653rs_macros"]

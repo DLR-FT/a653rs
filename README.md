@@ -1,4 +1,4 @@
-# apex.rs
+# a653rs
 
 Required Services
 https://www.aviation-ia.com/support-files/arinc653h
@@ -6,18 +6,13 @@ https://www.aviation-ia.com/support-files/arinc653h
 Extended Services
 https://www.aviation-ia.com/support-files/arinc653p2h
 
+## Position of **a653rs**
 
-## TODOS
-- Write Readme
-- Write RustDoc
-
-## Position of **apex.rs**
-
-**apex.rs** is supposed to be used as a dependency by the Hypervisor-Wrapper-Library, partitions and processes.
+**a853rs** is supposed to be used as a dependency by the Hypervisor-Wrapper-Library, partitions and processes.
 
 A potential Hypervisor-Wrapper-Library would use introduced Apex traits for providing functionality expected of an ARINC653 compliant hypervisor.
 
-Downstream partitions and processes written in Rust would use **apex.rs** in combination with any Hypervisor-Wrapper-Library implementing **apex.rs** for gaining safe abstracted Apex structures for using Apex functionalities.
+Downstream partitions and processes written in Rust would use **a653rs** in combination with any Hypervisor-Wrapper-Library implementing **a653rs** for gaining safe abstracted Apex structures for using Apex functionalities.
 
 For both cases *preludes* were defined offering all required structs, traits and type-aliases.
 - `bindings`: for the Hypervisor-Wrapper-Library
@@ -48,6 +43,10 @@ While it is expected that the implementing Hypervisor-Wrapper-Library will need 
 ## Decisions towards Downstream User (Partitions and Processes)
 
 TODO
+
+## TODOS
+- Write Readme
+- Write RustDoc
 
 # Licensing Information
 
