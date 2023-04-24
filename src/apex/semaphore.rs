@@ -1,3 +1,4 @@
+/// bindings for ARINC653P1-5 3.7.2.3 semaphore
 pub mod basic {
     use crate::bindings::*;
     use crate::Locked;
@@ -84,6 +85,7 @@ pub mod basic {
     }
 }
 
+/// abstractions for ARINC653P1-5 3.7.2.3 semaphore
 pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;

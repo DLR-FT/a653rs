@@ -34,15 +34,6 @@ pub fn no_return_type(ident: &str, output: &syn::ReturnType) -> syn::Result<()> 
     Ok(())
 }
 
-///
-/// # Example
-///
-/// ```
-/// single_function_argument(
-///     &syn::Type::Path(syn::parse_str("warm::Context").unwrap()),
-///     &fnItem.sig,
-/// )?;
-/// ```
 pub fn single_function_argument(ty: &syn::Type, sig: &Signature) -> syn::Result<()> {
     let path: String = ty
         .to_token_stream()

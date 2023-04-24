@@ -8,7 +8,7 @@ https://www.aviation-ia.com/support-files/arinc653p2h
 
 ## Position of **a653rs**
 
-**a853rs** is supposed to be used as a dependency by the Hypervisor-Wrapper-Library, partitions and processes.
+**a653rs** is supposed to be used as a dependency by the Hypervisor-Wrapper-Library, partitions and processes.
 
 A potential Hypervisor-Wrapper-Library would use introduced Apex traits for providing functionality expected of an ARINC653 compliant hypervisor.
 
@@ -32,7 +32,7 @@ These traits require the implementer to implement static functions which are clo
 
 While the required functions are closely related to the functions defined in the ARINC653 standard they are not identical. None of the functions in the standard return any value. Instead, references are passed into them, which are mutated during the function call. While our functions could have used the same structure we opted for a more Rust-like function style, in which we at least return a Result with an expected `Ok`-type in the ReturnCode `NoError`-case and a `ErrorReturnCode` as the `Err`-type in all other cases.
 
-> `ErrorReturnCode` is just the ARINC653 specific ReturnCode enum type without the `NoError`-variant.
+> `ErrorReturnCode` is just the ARINC653 specific `ReturnCode` enum type without the `NoError`-variant.
 
 ### Unsafe Functions
 

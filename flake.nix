@@ -47,9 +47,9 @@
                 # echo "Build all feature combinations:"
                 # RUSTFLAGS=-Awarnings verify-features
                 # echo "Build no_std:"
-                # RUSTFLAGS=-Awarnings verify-no_std -q
+                # RUSTFLAGS=-Awarnings verify-no_std
                 # echo "Build documentation:"
-                # RUSTFLAGS=-Awarnings verify-doc -q
+                # RUSTFLAGS=-Awarnings verify-doc
                 # echo "Run 'nix flake check'"
                 nix flake check
               '';
@@ -97,8 +97,8 @@
                 name = "verify-doc";
                 command = ''
                   cd $PRJ_ROOT
-                  cargo doc --all-features $@
-                  cargo doc --no-default-features $@
+                  cargo doc --all-features --workspace $@
+                  cargo doc --no-default-features --workspace $@
                 '';
                 help =
                   "Verify that the documentation builds without problems";
@@ -115,13 +115,23 @@
                 category = "test";
               }
               {
+                name = "verify-tests";
+                command = ''
+                  cd $PRJ_ROOT
+                  cargo test-all-features $@
+                '';
+                help =
+                  "Verify that a653rs tests run for all feature combinations";
+                category = "test";
+              }
+              {
                 name = "verify-examples";
                 command = ''
                   cd $PRJ_ROOT
                   cargo check-all-features --examples $@
                 '';
                 help =
-                  "Verify that a653rs builds for all feature combinations";
+                  "Verify that a653rs examples run for all feature combinations";
                 category = "test";
               }
             ];

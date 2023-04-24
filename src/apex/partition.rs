@@ -1,3 +1,4 @@
+/// bindings for ARINC653P1-5 3.2.2 partition
 pub mod basic {
     use crate::bindings::*;
     use crate::Locked;
@@ -85,6 +86,7 @@ pub mod basic {
     }
 }
 
+/// abstraction for ARINC653P1-5 3.2.2 partition
 pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;

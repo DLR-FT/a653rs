@@ -34,7 +34,7 @@ impl Context {
 
     pub fn gen_time_timed_wait(&self) -> ItemFn {
         parse_quote! {
-            pub fn timed_wait(&self, delay_time: core::time::Duration) {
+            pub fn timed_wait(&self, delay_time: core::time::Duration) -> Result<(), Error> {
                 <Hypervisor as ApexTimeP1Ext>::timed_wait(delay_time)
             }
         }

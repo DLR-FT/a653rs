@@ -1,20 +1,20 @@
-//! Abstraction Layer for the ARINC653 P1/P2/P4 API
+//! Abstraction layer for the ARINC653 P1/P2/P4 API
 
 #![no_std]
-// #![warn(missing_docs)]
+#![warn(clippy::missing_crate_level_docs)]
+#![warn(clippy::missing_errors_doc)]
+#![warn(clippy::missing_panics_doc)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
-/// Bindings to Traits which are supposed to be implemented for ARINC653 compliant Hypervisors
+/// Bindings to traits which are supposed to be implemented for ARINC653 compliant hypervisors
 pub mod bindings;
-/// Standard Prelude to be used by Application Software and High-level drivers
+/// Standard prelude to be used by application software and high-level drivers
 pub mod prelude;
 
 mod apex;
 
 #[cfg(feature = "macros")]
 pub use a653rs_macros::*;
-
-// replace all <an APEX integer type> with i64
 
 pub(crate) mod hidden {
     pub enum Key {}

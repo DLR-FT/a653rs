@@ -1,38 +1,59 @@
+/// bindings for ARINC653P1-5 3.7.2.2 blackboard
 pub mod basic {
     use crate::bindings::*;
     use crate::Locked;
 
-    /// Blackboard Name Type
+    /// ARINC653P1-5 3.7.1
     pub type BlackboardName = ApexName;
 
-    /// Blackboard Id Type
+    /// ARINC653P1-5 3.7.1
     ///
     /// According to ARINC 653P1-5 this may either be 32 or 64 bits.
     /// Internally we will use 64-bit by default.
-    /// The implementing Hypervisor may cast this to 32-bit if needed
+    /// The implementing hypervisor may cast this to 32-bit if needed
     pub type BlackboardId = ApexLongInteger;
 
-    /// ARINC653P1-5 required functions for Blackboard functionality
+    /// ARINC653P1-5 3.7.2.2 required functions for blackboard functionality
     pub trait ApexBlackboardP1 {
-        /// Creates new Blackboard
+        /// APEX653P1-5 3.7.2.2.1
+        ///
+        /// # Errors
+        /// - [ErrorReturnCode::InvalidConfig]: not enough memory is available
+        /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BLACKBOARDS](crate::bindings::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BLACKBOARDS) was reached
+        /// - [ErrorReturnCode::NoAction]: a blackboard with given `blackboard_name` already exists
+        /// - [ErrorReturnCode::InvalidParam]: `max_message_size` is zero
+        /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_blackboard<L: Locked>(
             blackboard_name: BlackboardName,
             max_message_size: MessageSize,
         ) -> Result<BlackboardId, ErrorReturnCode>;
 
-        /// Display specified message on Blackboard
+        /// APEX653P1-5 3.7.2.2.2
+        ///
+        /// # Errors
+        /// - [ErrorReturnCode::InvalidParam]: blackboard with `blackboard_id` does not exist
+        /// - [ErrorReturnCode::InvalidParam]: the `message` is longer than the `max_message_size` specified for this blackboard
+        /// - [ErrorReturnCode::InvalidParam]: `message` length is zero
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn display_blackboard<L: Locked>(
             blackboard_id: BlackboardId,
             message: &[ApexByte],
         ) -> Result<(), ErrorReturnCode>;
 
-        /// Read message from Blackboard. If no message is available, this function waits as long as `timeout` specifies.
+        /// APEX653P1-5 3.7.2.2.3
+        ///
+        /// # Errors
+        /// - [ErrorReturnCode::InvalidParam]: blackboard with `blackboard_id` does not exist
+        /// - [ErrorReturnCode::InvalidParam]: `time_out` is invalid
+        /// - [ErrorReturnCode::InvalidMode]: current process holds a mutex
+        /// - [ErrorReturnCode::InvalidMode]: current process is error handler AND `time_out` is not instant.
+        /// - [ErrorReturnCode::NotAvailable]: there is no message on the blackboard
+        /// - [ErrorReturnCode::TimedOut]: `time_out` elapsed
         ///
         /// # Safety
         ///
-        /// This function is safe, as long as the buffer can hold whatever is read
+        /// This function is safe, as long as the `message` can hold whatever is read
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         unsafe fn read_blackboard<L: Locked>(
             blackboard_id: BlackboardId,
@@ -40,24 +61,33 @@ pub mod basic {
             message: &mut [ApexByte],
         ) -> Result<MessageSize, ErrorReturnCode>;
 
-        /// Clears the Blackboard content
+        /// APEX653P1-5 3.7.2.2.4
+        ///
+        /// # Errors
+        /// - [ErrorReturnCode::InvalidParam]: blackboard with `blackboard_id` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn clear_blackboard<L: Locked>(blackboard_id: BlackboardId) -> Result<(), ErrorReturnCode>;
 
-        /// Get Blackboard Id from a given Name
+        /// APEX653P1-5 3.7.2.2.5
+        ///
+        /// # Errors
+        /// - [ErrorReturnCode::InvalidConfig]: blackboard with `blackboard_name` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_blackboard_id<L: Locked>(
             blackboard_name: BlackboardName,
         ) -> Result<BlackboardId, ErrorReturnCode>;
 
-        /// Get Blackboard Status
+        /// APEX653P1-5 3.7.2.2.6
+        ///
+        /// # Errors
+        /// - [ErrorReturnCode::InvalidParam]: blackboard with `blackboard_id` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_blackboard_status<L: Locked>(
             blackboard_id: BlackboardId,
         ) -> Result<BlackboardStatus, ErrorReturnCode>;
     }
 
-    /// Enum representing whether Blackboard is empty or not
+    /// ARINC653P1-5 3.7.1
     #[repr(u32)]
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -69,7 +99,7 @@ pub mod basic {
         Occupied = 1,
     }
 
-    /// Struct representing status information for a Blackboard
+    /// ARINC653P1-5 3.7.1
     #[derive(Debug, Clone, PartialEq, Eq)]
     pub struct BlackboardStatus {
         /// If the Blackboard is empty or not
@@ -81,6 +111,7 @@ pub mod basic {
     }
 }
 
+/// abstraction for ARINC653P1-5 3.7.2.2 blackboard
 pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;
@@ -91,17 +122,18 @@ pub mod abstraction {
     use crate::hidden::Key;
     use crate::prelude::*;
 
-    /// Blackboard Abstraction Struct
+    /// Blackboard abstraction struct
     #[derive(Debug, Clone)]
     pub struct Blackboard<B: ApexBlackboardP1> {
         _b: PhantomData<AtomicPtr<B>>,
         id: BlackboardId,
-        size: MessageSize,
+        max_size: MessageSize,
     }
 
     /// Free extra functions for implementer of [ApexBlackboardP1]
     pub trait ApexBlackboardP1Ext: ApexBlackboardP1 + Sized {
-        /// Get a [Blackboard] by [Name]
+        /// # Errors
+        /// - [Error::InvalidConfig]: blackboard with `name` does not exist
         fn get_blackboard(name: Name) -> Result<Blackboard<Self>, Error>;
     }
 
@@ -117,57 +149,67 @@ pub mod abstraction {
             Ok(Blackboard {
                 _b: Default::default(),
                 id,
-                size: status.max_message_size,
+                max_size: status.max_message_size,
             })
         }
     }
 
     impl<B: ApexBlackboardP1> Blackboard<B> {
-        /// Get [Self] by [Name]
+        /// # Errors
+        /// - [Error::InvalidConfig]: blackboard with `name` does not exist
         pub fn from_name(name: Name) -> Result<Blackboard<B>, Error> {
             B::get_blackboard(name)
         }
 
-        /// Return own Id
         pub fn id(&self) -> BlackboardId {
             self.id
         }
 
-        /// Return MaxMessageSize of this Blackboard
         pub fn size(&self) -> MessageSize {
-            self.size
+            self.max_size
         }
 
-        /// Checked Blackboard write from specified buffer
+        /// Checked blackboard write from specified buffer
         ///
-        /// # Additional Errors:
-        /// - WriteError:
-        ///   - buffer got zero length
-        ///   - buffer is larger than self.size()
+        /// # Errors
+        /// - [Error::WriteError]: the `buffer` is longer than the `max_message_size` specified for this blackboard
+        /// - [Error::WriteError]: `buffer` length is zero
         pub fn display(&self, buffer: &[ApexByte]) -> Result<(), Error> {
-            WriteError::validate(self.size, buffer)?;
+            buffer.validate_write(self.max_size)?;
             B::display_blackboard::<Key>(self.id, buffer)?;
             Ok(())
         }
 
         /// Checked Blackboard read into specified buffer
         ///
-        /// # Additional Errors:
-        /// -
+        /// # Errors
+        /// - [Error::InvalidParam]: `timeout` is invalid
+        /// - [Error::InvalidMode]: current process holds a mutex
+        /// - [Error::InvalidMode]: current process is error handler AND `timeout` is not instant.
+        /// - [Error::NotAvailable]: there is no message on the blackboard
+        /// - [Error::TimedOut]: `timeout` elapsed
+        /// - [Error::ReadError]: prodived `buffer` is too small for this [Blackboard]'s `max_message_size`
         pub fn read<'a>(
             &self,
             timeout: SystemTime,
             buffer: &'a mut [ApexByte],
         ) -> Result<&'a [ApexByte], Error> {
-            ReadError::validate(self.size, buffer)?;
+            buffer.validate_read(self.max_size)?;
             unsafe { self.read_unchecked(timeout, buffer) }
         }
 
         /// Unchecked Blackboard read into specified buffer
         ///
+        /// # Errors
+        /// - [Error::InvalidParam]: `timeout` is invalid
+        /// - [Error::InvalidMode]: current process holds a mutex
+        /// - [Error::InvalidMode]: current process is error handler AND `timeout` is not instant.
+        /// - [Error::NotAvailable]: there is no message on the blackboard
+        /// - [Error::TimedOut]: `timeout` elapsed
+        ///
         /// # Safety
         ///
-        /// This function is safe, as long as the buffer can hold whatever is read
+        /// This function is safe, as long as the `buffer` can hold whatever is read
         pub unsafe fn read_unchecked<'a>(
             &self,
             timeout: SystemTime,
@@ -177,7 +219,8 @@ pub mod abstraction {
             Ok(&buffer[..len])
         }
 
-        /// Clear Blackboard content
+        /// # Panics
+        /// if this blackboard does not exist anymore
         pub fn clear(&self) {
             // According to ARINC653P1-5 3.7.2.2.4 this can only fail if the blackboard_id
             //  does not exist in the current partition.
@@ -186,7 +229,8 @@ pub mod abstraction {
             B::clear_blackboard::<Key>(self.id).unwrap()
         }
 
-        /// Get Status of this Blackboard
+        /// # Panics
+        /// if this blackboard does not exist anymore
         pub fn status(&self) -> BlackboardStatus {
             // According to ARINC653P1-5 3.7.2.2.6 this can only fail if the blackboard_id
             //  does not exist in the current partition.
@@ -197,14 +241,11 @@ pub mod abstraction {
     }
 
     impl<B: ApexBlackboardP1> StartContext<B> {
-        /// Possible Errors:
-        ///   - InvalidConfig
-        ///     - Not enough available space
-        ///     - Blackboard limit has been reached
-        ///   - NoAction
-        ///     - Blackboard with this name already exists
-        ///   - InvalidParam:
-        ///     - MessageSize is equal or less than zero
+        /// # Errors
+        /// - [Error::InvalidConfig]: not enough memory is available
+        /// - [Error::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BLACKBOARDS](crate::bindings::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BLACKBOARDS) was reached
+        /// - [Error::NoAction]: a blackboard with given `name` already exists
+        /// - [Error::InvalidParam]: `size` is zero
         pub fn create_blackboard(
             &mut self,
             name: Name,
@@ -214,7 +255,7 @@ pub mod abstraction {
             Ok(Blackboard {
                 _b: Default::default(),
                 id,
-                size,
+                max_size: size,
             })
         }
     }

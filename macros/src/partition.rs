@@ -15,7 +15,6 @@ pub struct Partition {
     pub channel: Vec<Channel>,
     pub cold_start: ItemFn,
     pub warm_start: ItemFn,
-    // pub processes: Vec<(ItemFn, Process)>,
     pub processes: Vec<Process>,
 }
 
@@ -67,7 +66,7 @@ impl Partition {
 //         _ => {
 //             return Err(syn::Error::new_spanned(
 //                 meta,
-//                 "expected a list-syle attribute",
+//                 "expected a list-style attribute",
 //             ))
 //         }
 //     };

@@ -1,3 +1,4 @@
+/// bindings for ARINC653P1-5 3.6.2.2 queuing
 pub mod basic {
     use crate::bindings::*;
     use crate::Locked;
@@ -66,6 +67,7 @@ pub mod basic {
     }
 }
 
+/// abstractions for ARINC653P1-5 3.6.2.2 queuing
 pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;
@@ -229,7 +231,7 @@ pub mod abstraction {
         QueuingPortSender<MSG_SIZE, NB_MSGS, Q>
     {
         pub fn send(&self, buffer: &[ApexByte], timeout: SystemTime) -> Result<(), Error> {
-            WriteError::validate(MSG_SIZE, buffer)?;
+            buffer.validate_write(MSG_SIZE)?;
             Q::queueing_port_send_unchecked(self.id, buffer, timeout)
         }
 
@@ -270,7 +272,7 @@ pub mod abstraction {
             buffer: &'a mut [ApexByte],
             timeout: SystemTime,
         ) -> Result<&'a [ApexByte], Error> {
-            ReadError::validate(MSG_SIZE, buffer)?;
+            buffer.validate_read(MSG_SIZE)?;
             unsafe { Q::queueing_port_receive_unchecked(self.id, timeout, buffer) }
         }
 

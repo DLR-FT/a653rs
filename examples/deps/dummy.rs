@@ -1,8 +1,8 @@
 use a653rs::bindings::*;
 
-pub struct Dummy;
+pub struct DummyHypervisor;
 
-impl ApexPartitionP4 for Dummy {
+impl ApexPartitionP4 for DummyHypervisor {
     fn get_partition_status<L: Locked>() -> ApexPartitionStatus {
         todo!()
     }
@@ -14,7 +14,7 @@ impl ApexPartitionP4 for Dummy {
     }
 }
 
-impl ApexQueuingPortP1 for Dummy {
+impl ApexQueuingPortP1 for DummyHypervisor {
     fn get_queuing_port_id<L: Locked>(
         _queuing_port_name: QueuingPortName,
     ) -> Result<QueuingPortId, ErrorReturnCode> {
@@ -22,7 +22,7 @@ impl ApexQueuingPortP1 for Dummy {
     }
 }
 
-impl ApexQueuingPortP4 for Dummy {
+impl ApexQueuingPortP4 for DummyHypervisor {
     fn create_queuing_port<L: Locked>(
         _queuing_port_name: QueuingPortName,
         _max_message_size: MessageSize,
@@ -62,7 +62,7 @@ impl ApexQueuingPortP4 for Dummy {
     }
 }
 
-impl ApexSamplingPortP4 for Dummy {
+impl ApexSamplingPortP4 for DummyHypervisor {
     fn create_sampling_port<L: Locked>(
         _sampling_port_name: SamplingPortName,
         _max_message_size: MessageSize,
@@ -87,7 +87,7 @@ impl ApexSamplingPortP4 for Dummy {
     }
 }
 
-impl ApexSamplingPortP1 for Dummy {
+impl ApexSamplingPortP1 for DummyHypervisor {
     fn get_sampling_port_id<L: Locked>(
         _sampling_port_name: SamplingPortName,
     ) -> Result<SamplingPortId, ErrorReturnCode> {
@@ -101,7 +101,7 @@ impl ApexSamplingPortP1 for Dummy {
     }
 }
 
-impl ApexProcessP4 for Dummy {
+impl ApexProcessP4 for DummyHypervisor {
     fn create_process<L: Locked>(
         _attributes: &ApexProcessAttribute,
     ) -> Result<ProcessId, ErrorReturnCode> {
@@ -113,7 +113,7 @@ impl ApexProcessP4 for Dummy {
     }
 }
 
-impl ApexProcessP1 for Dummy {
+impl ApexProcessP1 for DummyHypervisor {
     fn set_priority<L: Locked>(
         _process_id: ProcessId,
         _priority: Priority,
@@ -186,12 +186,25 @@ impl ApexProcessP1 for Dummy {
     }
 }
 
-impl ApexTimeP4 for Dummy {
+impl ApexTimeP4 for DummyHypervisor {
     fn periodic_wait() -> Result<(), ErrorReturnCode> {
         todo!()
     }
 
     fn get_time() -> ApexSystemTime {
+        todo!()
+    }
+}
+
+impl ApexErrorP4 for DummyHypervisor {
+    fn report_application_message<L: Locked>(_message: &[ApexByte]) -> Result<(), ErrorReturnCode> {
+        todo!()
+    }
+
+    fn raise_application_error<L: Locked>(
+        _error_code: ErrorCode,
+        _message: &[ApexByte],
+    ) -> Result<(), ErrorReturnCode> {
         todo!()
     }
 }

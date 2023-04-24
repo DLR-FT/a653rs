@@ -30,6 +30,7 @@ jobs:
           - verify-no_std
           - verify-doc
           - verify-features
+          - verify-tests
           - verify-examples
     steps:
       - uses: actions/checkout@v2
