@@ -37,6 +37,7 @@
               cargo-expand
               cargo-all-features
               cargo-watch
+              cargo-release
               nixpkgs-fmt
               rust-analyzer
             ];
