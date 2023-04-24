@@ -1,4 +1,4 @@
-use apex_rs::bindings::*;
+use a653rs::bindings::*;
 
 pub struct Dummy;
 

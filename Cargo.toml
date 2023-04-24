@@ -1,27 +1,41 @@
 [package]
-name = "apex-rs"
-version = "0.1.0"
+name = "a653rs"
+version = "0.2.0"
 edition = "2021"
-authors = ["Sven Friedrich <sven.friedrich@tu-clausthal.de>"]
+authors = ["Sven Friedrich <sven.friedrich@dlr.de>"]
 license = "MIT OR Apache-2.0"
-keywords = ["hal", "arinc653", "apex"]
+keywords = [
+  "api",
+  "arinc",
+  "avionics",
+  "embedded",
+  "no_std",
+]
+description = "Aring653 abstraction library for hypervisor independent partition programming"
+categories = [
+  "aerospace", 
+  "api-bindings",
+  "embedded",
+  "no-std"
+]
+repository = "https://github.com/DLR-FT/a653rs/"
 
 [features]
 default = ["strum", "serde"]
 full_doc = []
-macros = [ "apex-rs-macros" ]
+macros = [ "a653rs_macros" ]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"], default-features = false, optional = true }
 strum = { version = "0.24", features = ["derive"], default-features = false, optional = true }
-apex-rs-macros = { path = "macros", optional = true }
+a653rs_macros = { version = "0.2.0", path = "macros", optional = true }
 
 [dev-dependencies]
-apex-rs-macros = { path = "macros" }
+a653rs_macros = { version = "0.2.0", path = "macros" }
 
 [workspace]
 members = [ "macros" ]
 
 [package.metadata.cargo-all-features]
 # macros is the same feature as apex-rs-macros
-denylist = ["apex-rs-macros"]
+denylist = ["a653rs_macros"]

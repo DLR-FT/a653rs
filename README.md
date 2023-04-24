@@ -49,3 +49,10 @@ While it is expected that the implementing Hypervisor-Wrapper-Library will need 
 
 TODO
 
+# Licensing Information
+
+The ARINC 653 standard belongs to the Aeronautical Radio, Incorporated (ARINC).
+
+For this library the copyright belongs to the German Aerospace Center / Deutsches Zentrum für Luft- und Raumfahrt e.V. (DLR): 
+
+Copyright © 2023 Deutsches Zentrum für Luft- und Raumfahrt e.V. (DLR)

@@ -43,7 +43,7 @@ impl Partition {
         let content: &mut Vec<Item> = &mut input.content.as_mut().unwrap().1;
 
         content.push(parse_quote!(
-            use apex_rs::prelude::*;
+            use a653rs::prelude::*;
         ));
         content.push(part.gen_type_alias().into());
         content.push(part.gen_start_mod().into());

@@ -27,7 +27,7 @@
         rec {
           devShells.default = (pkgs.devshell.mkShell {
             imports = [ "${devshell}/extra/git/hooks.nix" ];
-            name = "apex-rs-dev-shell";
+            name = "a653rs-dev-shell";
             packages = with pkgs; [
               clang
               rust-toolchain
@@ -111,7 +111,7 @@
                   cargo check-all-features $@
                 '';
                 help =
-                  "Verify that apex_rs builds for all feature combinations";
+                  "Verify that a653rs builds for all feature combinations";
                 category = "test";
               }
               {
@@ -121,7 +121,7 @@
                   cargo check-all-features --examples $@
                 '';
                 help =
-                  "Verify that apex_rs builds for all feature combinations";
+                  "Verify that a653rs builds for all feature combinations";
                 category = "test";
               }
             ];

@@ -49,13 +49,13 @@ impl Partition {
         let cold_start = &self.cold_start.sig.ident;
         let warm_start = &self.warm_start.sig.ident;
         parse_quote! {
-            impl apex_rs::prelude::Partition<Hypervisor> for Partition{
-                fn cold_start(&self, ctx: &mut apex_rs::prelude::StartContext<Hypervisor>){
+            impl a653rs::prelude::Partition<Hypervisor> for Partition{
+                fn cold_start(&self, ctx: &mut a653rs::prelude::StartContext<Hypervisor>){
                     let ctx = start::Context::new(ctx);
                     #cold_start (ctx)
                 }
 
-                fn warm_start(&self, ctx: &mut apex_rs::prelude::StartContext<Hypervisor>){
+                fn warm_start(&self, ctx: &mut a653rs::prelude::StartContext<Hypervisor>){
                     let ctx = start::Context::new(ctx);
                     #warm_start (ctx)
                 }

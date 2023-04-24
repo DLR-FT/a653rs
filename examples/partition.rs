@@ -1,5 +1,5 @@
-use apex_rs::prelude::PartitionExt;
-use apex_rs_macros::partition;
+use a653rs::prelude::PartitionExt;
+use a653rs_macros::partition;
 
 mod deps;
 

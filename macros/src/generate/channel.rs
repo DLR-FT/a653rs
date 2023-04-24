@@ -95,7 +95,7 @@ impl Channel {
         Ok(parse_quote! {
             mod #name {
                 use super::Hypervisor;
-                use apex_rs::prelude::*;
+                use a653rs::prelude::*;
 
                 #create_fn
                 #static_name

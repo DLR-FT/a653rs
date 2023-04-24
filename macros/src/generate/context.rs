@@ -39,13 +39,13 @@ impl Context {
         let st = parse_quote! {
             struct #name <'a, H> {
                 _p: core::marker::PhantomData<H>,
-                ctx: &'a mut apex_rs::prelude::StartContext<Hypervisor>,
+                ctx: &'a mut a653rs::prelude::StartContext<Hypervisor>,
             }
         };
 
         let im = parse_quote! {
             impl<'a, H> #name <'a, H>{
-                pub fn new(ctx: &'a mut apex_rs::prelude::StartContext<Hypervisor>) -> Self {
+                pub fn new(ctx: &'a mut a653rs::prelude::StartContext<Hypervisor>) -> Self {
                     Self {
                         _p: core::marker::PhantomData::default(),
                         ctx,
