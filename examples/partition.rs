@@ -7,7 +7,7 @@ fn main() {
     hello::Partition.run();
 }
 
-#[partition(crate::deps::dummy::Dummy)]
+#[partition(crate::deps::dummy::DummyHypervisor)]
 mod hello {
     #[sampling_out(name = "Ch1", msg_size = "10KB")]
     struct Channel1;

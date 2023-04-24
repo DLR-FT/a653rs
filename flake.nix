@@ -114,13 +114,23 @@
                 category = "test";
               }
               {
+                name = "verify-tests";
+                command = ''
+                  cd $PRJ_ROOT
+                  cargo check-all-features --tests $@
+                '';
+                help =
+                  "Verify that apex_rs tests run for all feature combinations";
+                category = "test";
+              }
+              {
                 name = "verify-examples";
                 command = ''
                   cd $PRJ_ROOT
                   cargo check-all-features --examples $@
                 '';
                 help =
-                  "Verify that apex_rs builds for all feature combinations";
+                  "Verify that apex_rs examples run for all feature combinations";
                 category = "test";
               }
             ];
