@@ -1,95 +1,29 @@
+/// bindings for ARINC653P1-5 3.3 process
 pub mod basic {
     use crate::bindings::*;
 
+    /// ARINC653P1-5 3.3.1
     pub type ProcessName = ApexName;
+    /// ARINC653P1-5 3.3.1
     pub type ProcessIndex = ApexInteger;
+    /// ARINC653P1-5 3.3.1
     pub type StackSize = ApexUnsigned;
-    pub type WaitingRange = ApexInteger;
 
+    /// ARINC653P1-5 3.3.1
     pub type Priority = ApexInteger;
-    // type PriorityType = ApexInteger;
-    // #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
-    // #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-    // pub struct Priority(PriorityType);
-    // pub const MIN_PRIORITY_VALUE: PriorityType = 1;
-    // pub const MAX_PRIORITY_VALUE: PriorityType = 239;
+    pub const MIN_PRIORITY_VALUE: Priority = 1;
+    pub const MAX_PRIORITY_VALUE: Priority = 239;
 
-    // impl TryFrom<PriorityType> for Priority {
-    //     type Error = PriorityType;
-
-    //     fn try_from(value: PriorityType) -> Result<Self, Self::Error> {
-    //         if let MIN_PRIORITY_VALUE..=MAX_PRIORITY_VALUE = value {
-    //             return Ok(Priority(value));
-    //         }
-    //         Err(value)
-    //     }
-    // }
-
-    // impl From<Priority> for PriorityType {
-    //     fn from(prio: Priority) -> Self {
-    //         prio.0
-    //     }
-    // }
-
-    // #[cfg(feature = "serde")]
-    // impl<'de> serde::Deserialize<'de> for Priority {
-    //     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    //     where
-    //         D: serde::Deserializer<'de>,
-    //     {
-    //         let prio: PriorityType = serde::Deserialize::deserialize(deserializer)?;
-    //         prio.try_into().map_err(serde::de::Error::custom)
-    //     }
-    // }
-
-    // impl Default for Priority {
-    //     fn default() -> Self {
-    //         Priority(MIN_PRIORITY_VALUE)
-    //     }
-    // }
-
+    /// ARINC653P1-5 3.3.1
     pub type LockLevel = ApexInteger;
-    // type LockLevelType = ApexInteger;
-    // #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
-    // #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-    // pub struct LockLevel(LockLevelType);
-    // pub const MIN_LOCK_LEVEL: LockLevelType = 0;
-    // pub const MAX_LOCK_LEVEL: LockLevelType = 16;
+    pub const MIN_LOCK_LEVEL: LockLevel = 0;
+    pub const MAX_LOCK_LEVEL: LockLevel = 16;
 
-    // impl TryFrom<LockLevelType> for LockLevel {
-    //     type Error = LockLevelType;
+    /// ARINC653P1-5 3.3.1 C compatible function type
+    pub type SystemAddress = extern "C" fn();
 
-    //     fn try_from(value: LockLevelType) -> Result<Self, Self::Error> {
-    //         if let MIN_LOCK_LEVEL..=MAX_LOCK_LEVEL = value {
-    //             return Ok(LockLevel(value));
-    //         }
-    //         Err(value)
-    //     }
-    // }
-
-    // impl From<LockLevel> for LockLevelType {
-    //     fn from(lock: LockLevel) -> Self {
-    //         lock.0
-    //     }
-    // }
-
-    // #[cfg(feature = "serde")]
-    // impl<'de> serde::Deserialize<'de> for LockLevel {
-    //     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    //     where
-    //         D: serde::Deserializer<'de>,
-    //     {
-    //         let lock: LockLevelType = serde::Deserialize::deserialize(deserializer)?;
-    //         lock.try_into().map_err(serde::de::Error::custom)
-    //     }
-    // }
-
-    // impl Default for LockLevel {
-    //     fn default() -> Self {
-    //         LockLevel(MIN_LOCK_LEVEL)
-    //     }
-    // }
-
+    /// ARINC653P1-5 3.3.1
+    ///
     /// According to ARINC 653P1-5 this may either be 32 or 64 bits.
     /// Internally we will use 64-bit by default.
     /// The implementing Hypervisor may cast this to 32-bit if needed
@@ -97,6 +31,7 @@ pub mod basic {
     pub const NULL_PROCESS_ID: ProcessId = 0;
     pub const MAIN_PROCESS_ID: ProcessId = -1;
 
+    /// ARINC653P1-5 3.3.1
     #[repr(u32)]
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -109,6 +44,7 @@ pub mod basic {
         Faulted = 4,
     }
 
+    /// ARINC653P1-5 3.3.1
     #[repr(u32)]
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -118,6 +54,7 @@ pub mod basic {
         Hard = 1,
     }
 
+    /// ARINC653P1-5 3.3.1
     #[repr(C)]
     #[derive(Debug, Clone, PartialEq, Eq)]
     pub struct ApexProcessAttribute {
@@ -130,6 +67,7 @@ pub mod basic {
         pub name: ProcessName,
     }
 
+    /// ARINC653P1-5 3.3.1
     #[repr(C)]
     #[derive(Debug, Clone, PartialEq, Eq)]
     pub struct ApexProcessStatus {
@@ -139,8 +77,21 @@ pub mod basic {
         pub attributes: ApexProcessAttribute,
     }
 
+    /// ARINC653P4 3.3.2 required functions for process functionality
     pub trait ApexProcessP4 {
-        // Only during Warm/Cold-Start
+        /// ARINC653P4 3.3.2.3
+        ///
+        /// # Errors
+        /// - [ErrorReturnCode::InvalidConfig]: not enough memory is available
+        /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_PROCESSES](crate::bindings::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_PROCESSES) was reached
+        /// - [ErrorReturnCode::NoAction]: a process with given `attributes.name` already exists
+        /// - [ErrorReturnCode::InvalidParam]: `attributes.stack_size` is invalid
+        /// - [ErrorReturnCode::InvalidParam]: `attributes.base_priority` is invalid
+        /// - [ErrorReturnCode::InvalidParam]: `attributes.period` is invalid
+        /// - [ErrorReturnCode::InvalidConfig]: `attributes.period` is positive and `attributes.period` is not dividable by the partition period
+        /// - [ErrorReturnCode::InvalidParam]: `attributes.time_capacity` is invalid
+        /// - [ErrorReturnCode::InvalidParam]: `attributes.period` is positive and `attributes.period` is less than `attributes.time_capacity`
+        /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_process<L: Locked>(
             attributes: &ApexProcessAttribute,
@@ -212,6 +163,7 @@ pub mod basic {
     }
 }
 
+/// abstractions for ARINC653P1-5 3.3 process
 pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;

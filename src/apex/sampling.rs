@@ -1,3 +1,4 @@
+/// bindings for ARINC653P1-5 3.6.2.1 sampling
 pub mod basic {
     use crate::bindings::*;
     use crate::Locked;
@@ -67,6 +68,8 @@ pub mod basic {
         ) -> Result<ApexSamplingPortStatus, ErrorReturnCode>;
     }
 }
+
+/// abstractions for ARINC653P1-5 3.6.2.1 sampling
 pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;
@@ -227,7 +230,7 @@ pub mod abstraction {
 
     impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> SamplingPortSource<MSG_SIZE, S> {
         pub fn send(&self, buffer: &[ApexByte]) -> Result<(), Error> {
-            WriteError::validate(MSG_SIZE, buffer)?;
+            buffer.validate_write(MSG_SIZE)?;
             S::sampling_port_send_unchecked(self.id, buffer)
         }
 
@@ -249,7 +252,7 @@ pub mod abstraction {
             // According to ARINC653P1-5 3.6.2.1.5 this can only fail if the sampling_port_id
             //  does not exist in the current partition.
             // But since we retrieve the sampling_port_id directly from the hypervisor
-            //  there is no possible way for it not existing
+            //  there is no possible way for it to not exist
             S::get_sampling_port_status::<Key>(self.id).unwrap().into()
         }
     }
@@ -259,7 +262,7 @@ pub mod abstraction {
             &self,
             buffer: &'a mut [ApexByte],
         ) -> Result<(Validity, &'a [ApexByte]), Error> {
-            ReadError::validate(MSG_SIZE, buffer)?;
+            buffer.validate_read(MSG_SIZE)?;
             unsafe { S::sampling_port_receive_unchecked(self.id, buffer) }
         }
 

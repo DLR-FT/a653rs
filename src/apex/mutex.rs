@@ -1,17 +1,26 @@
+/// bindings for ARINC653P1-5 3.7.2.5 mutex
 pub mod basic {
     use crate::bindings::*;
     use crate::Locked;
+    /// ARINC653P1-5 3.7.1
     pub type MutexName = ApexName;
 
+    /// ARINC653P1-5 3.7.1
+    ///
     /// According to ARINC 653P1-5 this may either be 32 or 64 bits.
     /// Internally we will use 64-bit by default.
     /// The implementing Hypervisor may cast this to 32-bit if needed
     pub type MutexId = ApexLongInteger;
+
+    /// ARINC653P1-5 3.7.1
     pub type LockCount = ApexInteger;
 
+    /// ARINC653P1-5 3.7.2.5
     pub const NO_MUTEX_OWNED: MutexId = -2;
+    /// ARINC653P1-5 3.7.2.5
     pub const PREEMPTION_LOCK_MUTEX: MutexId = -3;
 
+    /// ARINC653P1-5 3.7.1
     #[repr(u32)]
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -21,6 +30,7 @@ pub mod basic {
         Owned = 1,
     }
 
+    /// ARINC653P1-5 3.7.1
     #[derive(Debug, Clone, PartialEq, Eq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct MutexStatus {
@@ -31,11 +41,18 @@ pub mod basic {
         pub waiting_processes: WaitingRange,
     }
 
+    /// ARINC653P1-5 required functions for Mutex functionality
+    ///
     /// [`ApexMutexP1`] requires the implementation of the [`ApexProcessP4`] trait
     ///  because [`ApexMutexP1::get_process_mutex_state`] and [`ApexMutexP1::reset_mutex`]
     ///  take a [`ProcessId`] and hence need working process functionalities
     pub trait ApexMutexP1: ApexProcessP4 {
-        // Only during Warm/Cold-Start
+        /// # Errors
+        /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_MUTEXES](crate::bindings::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_MUTEXES) was reached
+        /// - [ErrorReturnCode::NoAction]: an mutex with given `mutex_name` already exists in this partition
+        /// - [ErrorReturnCode::InvalidParam]: `mutex_priority` is invalid
+        /// - [ErrorReturnCode::InvalidParam]: [QueuingDiscipline](crate::bindings::QueuingDiscipline) in `queuing_discipline` is unsupported
+        /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_mutex<L: Locked>(
             mutex_name: MutexName,
@@ -43,6 +60,16 @@ pub mod basic {
             queuing_discipline: QueuingDiscipline,
         ) -> Result<MutexId, ErrorReturnCode>;
 
+        /// # Errors
+        /// - [ErrorReturnCode::InvalidParam]: mutex with given `mutex_id` does not exist in this partition
+        /// - [ErrorReturnCode::InvalidParam]: `mutex_id` is [PREEMPTION_LOCK_MUTEX]
+        /// - [ErrorReturnCode::InvalidParam]: `time_out` is invalid
+        /// - [ErrorReturnCode::InvalidMode]: different mutex is already held by this process
+        /// - [ErrorReturnCode::InvalidMode]: this process is the error handler
+        /// - [ErrorReturnCode::InvalidMode]: the priority of this process is greater than the priority of the given mutex
+        /// - [ErrorReturnCode::NotAvailable]:
+        /// - [ErrorReturnCode::TimedOut]: `time_out` elapsed
+        /// - [ErrorReturnCode::InvalidConfig]: lock count of given mutex is at [MAX_LOCK_LEVEL](crate::bindings::MAX_LOCK_LEVEL)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn acquire_mutex<L: Locked>(
             mutex_id: MutexId,
@@ -71,6 +98,7 @@ pub mod basic {
     }
 }
 
+/// abstractions for ARINC653P1-5 3.7.2.5 mutex
 pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;

@@ -11,7 +11,7 @@ use crate::parse::util::{
     contains_attribute, remove_attributes, MayFromAttributes, WrappedByteSize, WrappedDuration,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, EnumString, Display)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, EnumString, Display)]
 #[strum(ascii_case_insensitive)]
 pub enum QueuingDiscipline {
     Fifo,
