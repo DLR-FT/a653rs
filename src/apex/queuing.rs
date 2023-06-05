@@ -68,6 +68,7 @@ pub mod basic {
 
 pub mod abstraction {
     use core::marker::PhantomData;
+    use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{
@@ -83,7 +84,7 @@ pub mod abstraction {
         const NB_MSGS: MessageRange,
         Q: ApexQueuingPortP4,
     > {
-        _b: PhantomData<Q>,
+        _b: PhantomData<AtomicPtr<Q>>,
         id: QueuingPortId,
     }
 
@@ -93,7 +94,7 @@ pub mod abstraction {
         const NB_MSGS: MessageRange,
         Q: ApexQueuingPortP4,
     > {
-        _b: PhantomData<Q>,
+        _b: PhantomData<AtomicPtr<Q>>,
         id: QueuingPortId,
     }
 

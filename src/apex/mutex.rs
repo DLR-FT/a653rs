@@ -73,6 +73,7 @@ pub mod basic {
 
 pub mod abstraction {
     use core::marker::PhantomData;
+    use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{ApexMutexP1, LockCount, MutexId, MutexName, MutexStatus};
@@ -101,7 +102,7 @@ pub mod abstraction {
 
     #[derive(Debug, Clone)]
     pub struct Mutex<M: ApexMutexP1> {
-        _b: PhantomData<M>,
+        _b: PhantomData<AtomicPtr<M>>,
         id: MutexId,
         priority: Priority,
     }

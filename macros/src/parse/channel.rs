@@ -12,8 +12,9 @@ use crate::parse::util::{
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, EnumString, Display)]
+#[strum(ascii_case_insensitive)]
 pub enum QueuingDiscipline {
-    FIFO,
+    Fifo,
     Priority,
 }
 
@@ -160,7 +161,7 @@ impl Channel {
         }
     }
 
-    pub fn from_content<'a>(items: &mut Vec<Item>) -> syn::Result<Vec<Channel>> {
+    pub fn from_content(items: &mut Vec<Item>) -> syn::Result<Vec<Channel>> {
         let mut channel = vec![];
         *items = items
             .drain(..)

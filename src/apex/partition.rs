@@ -87,6 +87,7 @@ pub mod basic {
 
 pub mod abstraction {
     use core::marker::PhantomData;
+    use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{ApexPartitionP4, NumCores, OperatingMode, PartitionId, StartCondition};
@@ -122,7 +123,7 @@ pub mod abstraction {
 
     #[derive(Debug)]
     pub struct StartContext<A> {
-        _a: PhantomData<A>,
+        _a: PhantomData<AtomicPtr<A>>,
     }
 
     pub trait PartitionExt<A>: Partition<A>

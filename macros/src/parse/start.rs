@@ -46,14 +46,11 @@ impl TryFrom<StartFlags> for Option<StartType> {
             _ => {
                 let mut flags = flags.iter();
                 let mut err = syn::Error::new(
-                    flags.next().unwrap().span().clone(),
+                    *flags.next().unwrap().span(),
                     "Multiple start flags attached to same function.",
                 );
                 for (i, flag) in flags.enumerate() {
-                    err.combine(syn::Error::new(
-                        flag.span().clone(),
-                        format!("{}th flag", i + 2),
-                    ))
+                    err.combine(syn::Error::new(*flag.span(), format!("{}th flag", i + 2)))
                 }
                 Err(err)
             }
@@ -92,7 +89,7 @@ impl Start {
         Ok(self)
     }
 
-    pub fn from_content<'a>(root: &Span, items: &mut Vec<Item>) -> syn::Result<Start> {
+    pub fn from_content(root: &Span, items: &mut [Item]) -> syn::Result<Start> {
         let mut warm: Option<ItemFn> = None;
         let mut cold: Option<ItemFn> = None;
         for item in items.iter_mut().filter_map(|item| match item {
@@ -117,7 +114,7 @@ impl Start {
             };
             if let Some(leftover) = leftover {
                 let mut err = syn::Error::new(
-                    item.span().clone(),
+                    item.span(),
                     format!("{}Start already defined", start.as_ref()),
                 );
                 err.combine(syn::Error::new(leftover.span(), "First definition here"));

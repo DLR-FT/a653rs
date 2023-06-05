@@ -52,6 +52,7 @@ pub mod basic {
 
 pub mod abstraction {
     use core::marker::PhantomData;
+    use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{ApexEventP1, EventId, EventState, EventStatus};
@@ -60,7 +61,7 @@ pub mod abstraction {
 
     #[derive(Debug, Clone)]
     pub struct Event<E: ApexEventP1> {
-        _b: PhantomData<E>,
+        _b: PhantomData<AtomicPtr<E>>,
         id: EventId,
     }
 

@@ -86,6 +86,7 @@ pub mod basic {
 
 pub mod abstraction {
     use core::marker::PhantomData;
+    use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{ApexSemaphoreP1, SemaphoreId, SemaphoreStatus, SemaphoreValue};
@@ -95,7 +96,7 @@ pub mod abstraction {
 
     #[derive(Debug, Clone)]
     pub struct Semaphore<S: ApexSemaphoreP1> {
-        _b: PhantomData<S>,
+        _b: PhantomData<AtomicPtr<S>>,
         id: SemaphoreId,
         maximum: SemaphoreValue,
     }

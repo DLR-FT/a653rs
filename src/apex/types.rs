@@ -101,7 +101,7 @@ pub mod basic {
     #[cfg_attr(feature = "strum", derive(strum::FromRepr))]
     pub enum QueuingDiscipline {
         /// First in/first out queue
-        FIFO = 0,
+        Fifo = 0,
         /// Priority queue
         Priority = 1,
     }
@@ -111,7 +111,7 @@ pub mod basic {
 
         fn try_from(value: ApexUnsigned) -> Result<Self, Self::Error> {
             match value {
-                0 => Ok(QueuingDiscipline::FIFO),
+                0 => Ok(QueuingDiscipline::Fifo),
                 1 => Ok(QueuingDiscipline::Priority),
                 _ => Err(value),
             }

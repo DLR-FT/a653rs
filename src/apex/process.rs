@@ -214,6 +214,7 @@ pub mod basic {
 
 pub mod abstraction {
     use core::marker::PhantomData;
+    use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{
@@ -284,7 +285,7 @@ pub mod abstraction {
 
     #[derive(Debug, Clone)]
     pub struct Process<P: ApexProcessP4> {
-        _p: PhantomData<P>,
+        _p: PhantomData<AtomicPtr<P>>,
         id: ProcessId,
     }
 

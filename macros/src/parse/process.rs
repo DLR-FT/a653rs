@@ -37,6 +37,7 @@ impl FromMeta for SystemTime {
 }
 
 #[derive(Debug, Clone, Copy, Display, EnumString, EnumVariantNames)]
+#[strum(ascii_case_insensitive)]
 pub enum Deadline {
     Soft,
     Hard,
@@ -137,7 +138,7 @@ impl Process {
         };
         Process {
             time_capacity: p.time_capacity,
-            period: SystemTime::Normal(p.period.into()),
+            period: SystemTime::Normal(p.period),
             stack_size: p.stack_size.into(),
             base_priority: p.base_priority,
             deadline: p.deadline,
@@ -146,7 +147,7 @@ impl Process {
         }
     }
 
-    pub fn from_content<'a>(items: &mut Vec<Item>) -> syn::Result<Vec<Process>> {
+    pub fn from_content(items: &mut [Item]) -> syn::Result<Vec<Process>> {
         let mut procs = vec![];
         for item in items.iter_mut().filter_map(|item| match item {
             Item::Fn(f) => Some(f),

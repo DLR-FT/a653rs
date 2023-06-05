@@ -83,6 +83,7 @@ pub mod basic {
 
 pub mod abstraction {
     use core::marker::PhantomData;
+    use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{ApexBlackboardP1, BlackboardId, BlackboardStatus};
@@ -93,7 +94,7 @@ pub mod abstraction {
     /// Blackboard Abstraction Struct
     #[derive(Debug, Clone)]
     pub struct Blackboard<B: ApexBlackboardP1> {
-        _b: PhantomData<B>,
+        _b: PhantomData<AtomicPtr<B>>,
         id: BlackboardId,
         size: MessageSize,
     }

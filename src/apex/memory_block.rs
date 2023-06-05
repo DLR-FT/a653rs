@@ -39,7 +39,7 @@ pub mod abstraction {
 
     // #[derive(Debug)]
     // pub struct MemoryBlock<M: ApexMemoryBlockP2> {
-    //     _b: PhantomData<M>,
+    //     _b: PhantomData<AtomicPtr<M>>,
     //     address: MemoryBlockAddress,
     //     size:
     // }

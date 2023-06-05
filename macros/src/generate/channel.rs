@@ -73,7 +73,7 @@ impl Channel {
         let len = name.bytes().len();
         if len > LEN {
             return Err(syn::Error::new_spanned(
-                name.clone(),
+                name,
                 format!("max name length is {LEN} bytes"),
             ));
         }

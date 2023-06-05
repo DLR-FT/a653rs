@@ -38,7 +38,7 @@ impl Context {
         let name = Context::Start.get_context_ident();
         let st = parse_quote! {
             struct #name <'a, H> {
-                _p: core::marker::PhantomData<H>,
+                _p: core::marker::PhantomData<core::sync::atomic::AtomicPtr<H>>,
                 ctx: &'a mut a653rs::prelude::StartContext<Hypervisor>,
             }
         };
@@ -59,14 +59,10 @@ impl Context {
     fn gen_process_context(&self, part: &Partition) -> impl Iterator<Item = Item> {
         let name = self.get_context_ident();
         let fields = part.gen_context_fields();
-        let field_names: Vec<_> = part
-            .gen_context_fields()
-            .map(|f| f.ident)
-            .flatten()
-            .collect();
+        let field_names: Vec<_> = part.gen_context_fields().filter_map(|f| f.ident).collect();
         let st = parse_quote! {
             struct #name <'a, H> {
-                _p: core::marker::PhantomData<H>,
+                _p: core::marker::PhantomData<core::sync::atomic::AtomicPtr<H>>,
                 proc_self: &'a Process<Hypervisor>,
                 #(#fields),*
             }
@@ -93,7 +89,7 @@ impl Context {
     }
 
     fn gen_all_extensions() -> impl Iterator<Item = ItemImpl> {
-        Context::iter().map(|c| c.gen_extension()).flatten()
+        Context::iter().flat_map(|c| c.gen_extension())
     }
 
     pub fn get_context_ident(&self) -> Ident {

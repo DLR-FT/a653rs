@@ -69,6 +69,7 @@ pub mod basic {
 }
 pub mod abstraction {
     use core::marker::PhantomData;
+    use core::sync::atomic::AtomicPtr;
     use core::time::Duration;
 
     // Reexport important basic-types for downstream-user
@@ -99,13 +100,13 @@ pub mod abstraction {
 
     #[derive(Debug, Clone)]
     pub struct SamplingPortSource<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> {
-        _b: PhantomData<S>,
+        _b: PhantomData<AtomicPtr<S>>,
         id: SamplingPortId,
     }
 
     #[derive(Debug, Clone)]
     pub struct SamplingPortDestination<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> {
-        _b: PhantomData<S>,
+        _b: PhantomData<AtomicPtr<S>>,
         id: SamplingPortId,
         refresh: Duration,
     }

@@ -21,7 +21,7 @@ pub struct Partition {
 
 impl Partition {
     fn from_mod(hypervisor: TypePath, input: &mut ItemMod) -> syn::Result<Partition> {
-        let root_span = input.span().clone();
+        let root_span = input.span();
         let (_, content) = input.content.as_mut().unwrap();
         let channel = Channel::from_content(content)?;
         let start = Start::from_content(&root_span, content)?;

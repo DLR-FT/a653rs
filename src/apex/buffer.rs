@@ -55,6 +55,7 @@ pub mod basic {
 }
 pub mod abstraction {
     use core::marker::PhantomData;
+    use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{ApexBufferP1, BufferId, BufferStatus};
@@ -64,7 +65,7 @@ pub mod abstraction {
 
     #[derive(Debug, Clone)]
     pub struct Buffer<B: ApexBufferP1> {
-        _b: PhantomData<B>,
+        _b: PhantomData<AtomicPtr<B>>,
         id: BufferId,
         size: MessageSize,
         range: MessageRange,

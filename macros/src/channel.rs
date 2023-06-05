@@ -11,8 +11,9 @@ use crate::util::{
 };
 
 #[derive(Debug, Clone, PartialEq, EnumString)]
+#[strum(ascii_case_insensitive)]
 pub enum QueuingDiscipline {
-    FIFO,
+    Fifo,
     Priority,
 }
 
