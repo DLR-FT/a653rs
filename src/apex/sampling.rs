@@ -101,17 +101,38 @@ pub mod abstraction {
         }
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct SamplingPortSource<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> {
         _b: PhantomData<AtomicPtr<S>>,
         id: SamplingPortId,
     }
 
-    #[derive(Debug, Clone)]
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> Clone for SamplingPortSource<MSG_SIZE, S> {
+        fn clone(&self) -> Self {
+            Self {
+                _b: self._b,
+                id: self.id,
+            }
+        }
+    }
+
+    #[derive(Debug)]
     pub struct SamplingPortDestination<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> {
         _b: PhantomData<AtomicPtr<S>>,
         id: SamplingPortId,
         refresh: Duration,
+    }
+
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> Clone
+        for SamplingPortDestination<MSG_SIZE, S>
+    {
+        fn clone(&self) -> Self {
+            Self {
+                _b: self._b,
+                id: self.id,
+                refresh: self.refresh,
+            }
+        }
     }
 
     pub trait ApexSamplingPortP4Ext: ApexSamplingPortP4 + Sized {

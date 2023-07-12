@@ -109,12 +109,23 @@ pub mod abstraction {
     use crate::prelude::*;
 
     /// Buffer abstraction struct
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct Buffer<B: ApexBufferP1> {
         _b: PhantomData<AtomicPtr<B>>,
         id: BufferId,
         max_size: MessageSize,
         max_number_msgs: MessageRange,
+    }
+
+    impl<B: ApexBufferP1> Clone for Buffer<B> {
+        fn clone(&self) -> Self {
+            Self {
+                _b: self._b,
+                id: self.id,
+                max_size: self.max_size,
+                max_number_msgs: self.max_number_msgs,
+            }
+        }
     }
 
     /// Free extra functions for implementer of [ApexBufferP1]

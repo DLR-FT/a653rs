@@ -235,10 +235,19 @@ pub mod abstraction {
         }
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct Process<P: ApexProcessP4> {
         _p: PhantomData<AtomicPtr<P>>,
         id: ProcessId,
+    }
+
+    impl<P: ApexProcessP4> Clone for Process<P> {
+        fn clone(&self) -> Self {
+            Self {
+                _p: self._p,
+                id: self.id,
+            }
+        }
     }
 
     pub trait ApexProcessP1Ext: ApexProcessP1 + Sized {

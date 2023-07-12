@@ -123,11 +123,21 @@ pub mod abstraction {
     use crate::prelude::*;
 
     /// Blackboard abstraction struct
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct Blackboard<B: ApexBlackboardP1> {
         _b: PhantomData<AtomicPtr<B>>,
         id: BlackboardId,
         max_size: MessageSize,
+    }
+
+    impl<B: ApexBlackboardP1> Clone for Blackboard<B> {
+        fn clone(&self) -> Self {
+            Self {
+                _b: self._b,
+                id: self.id,
+                max_size: self.max_size,
+            }
+        }
     }
 
     /// Free extra functions for implementer of [ApexBlackboardP1]
