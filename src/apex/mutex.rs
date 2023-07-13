@@ -128,11 +128,21 @@ pub mod abstraction {
         }
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct Mutex<M: ApexMutexP1> {
         _b: PhantomData<AtomicPtr<M>>,
         id: MutexId,
         priority: Priority,
+    }
+
+    impl<M: ApexMutexP1> Clone for Mutex<M> {
+        fn clone(&self) -> Self {
+            Self {
+                _b: self._b,
+                id: self.id,
+                priority: self.priority,
+            }
+        }
     }
 
     pub trait ApexMutexP1Ext: ApexMutexP1 + Sized {

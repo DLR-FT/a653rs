@@ -80,7 +80,7 @@ pub mod abstraction {
     use crate::hidden::Key;
     use crate::prelude::*;
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct QueuingPortSender<
         const MSG_SIZE: MessageSize,
         const NB_MSGS: MessageRange,
@@ -90,7 +90,18 @@ pub mod abstraction {
         id: QueuingPortId,
     }
 
-    #[derive(Debug, Clone)]
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4> Clone
+        for QueuingPortSender<MSG_SIZE, NB_MSGS, S>
+    {
+        fn clone(&self) -> Self {
+            Self {
+                _b: self._b,
+                id: self.id,
+            }
+        }
+    }
+
+    #[derive(Debug)]
     pub struct QueuingPortReceiver<
         const MSG_SIZE: MessageSize,
         const NB_MSGS: MessageRange,
@@ -98,6 +109,17 @@ pub mod abstraction {
     > {
         _b: PhantomData<AtomicPtr<Q>>,
         id: QueuingPortId,
+    }
+
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4> Clone
+        for QueuingPortReceiver<MSG_SIZE, NB_MSGS, S>
+    {
+        fn clone(&self) -> Self {
+            Self {
+                _b: self._b,
+                id: self.id,
+            }
+        }
     }
 
     pub trait ApexQueuingPortP4Ext: ApexQueuingPortP4 + Sized {

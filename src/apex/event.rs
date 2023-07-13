@@ -101,10 +101,19 @@ pub mod abstraction {
     use crate::prelude::*;
 
     /// Event abstraction struct
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct Event<E: ApexEventP1> {
         _b: PhantomData<AtomicPtr<E>>,
         id: EventId,
+    }
+
+    impl<E: ApexEventP1> Clone for Event<E> {
+        fn clone(&self) -> Self {
+            Self {
+                _b: self._b,
+                id: self.id,
+            }
+        }
     }
 
     /// Free extra functions for implementer of [ApexEventP1]

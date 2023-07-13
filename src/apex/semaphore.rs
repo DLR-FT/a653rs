@@ -96,11 +96,21 @@ pub mod abstraction {
     use crate::hidden::Key;
     use crate::prelude::*;
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct Semaphore<S: ApexSemaphoreP1> {
         _b: PhantomData<AtomicPtr<S>>,
         id: SemaphoreId,
         maximum: SemaphoreValue,
+    }
+
+    impl<S: ApexSemaphoreP1> Clone for Semaphore<S> {
+        fn clone(&self) -> Self {
+            Self {
+                _b: self._b,
+                id: self.id,
+                maximum: self.maximum,
+            }
+        }
     }
 
     pub trait ApexSemaphoreP1Ext: ApexSemaphoreP1 + Sized {
