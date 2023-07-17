@@ -132,7 +132,15 @@ pub mod abstraction {
     where
         A: ApexPartitionP4,
     {
-        fn get_partition_status() -> PartitionStatus;
+        fn get_status() -> PartitionStatus;
+
+        /// change partition mode  
+        /// DO NOT CALL THIS WITH [OperatingMode::Normal] FROM THE START FUNCTION.
+        ///
+        /// # Errors
+        /// - [Error::NoAction]: `mode` is [OperatingMode::Normal] and partition mode is [OperatingMode::Normal]
+        /// - [Error::InvalidMode]: `mode` is [OperatingMode::WarmStart] and partition mode is [OperatingMode::ColdStart]
+        fn set_mode(mode: OperatingMode) -> Result<(), Error>;
 
         fn run(self) -> !;
     }
@@ -142,15 +150,19 @@ pub mod abstraction {
         P: Partition<A>,
         A: ApexPartitionP4,
     {
-        fn get_partition_status() -> PartitionStatus {
+        fn get_status() -> PartitionStatus {
             A::get_partition_status::<Key>().into()
+        }
+
+        fn set_mode(mode: OperatingMode) -> Result<(), Error> {
+            Ok(A::set_partition_mode::<Key>(mode)?)
         }
 
         fn run(self) -> ! {
             let mut ctx = StartContext {
                 _a: Default::default(),
             };
-            let status = Self::get_partition_status();
+            let status = Self::get_status();
 
             match status.operating_mode {
                 OperatingMode::ColdStart => self.cold_start(&mut ctx),
