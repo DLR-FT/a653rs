@@ -109,3 +109,25 @@ impl Start {
         .verify_fn_form()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use syn::parse_quote;
+
+    use crate::parse::start::*;
+
+    #[test]
+    fn test_start_flags_from_attributes_both_present() {
+        use darling::FromAttributes;
+
+        // Mock attributes
+        let warm_attr = parse_quote!(#[start(warm)]);
+        let cold_attr = parse_quote!(#[start(cold)]);
+
+        // Test case: Both warm and cold attributes are present
+        let flags: StartFlags = StartFlags::from_attributes(&[warm_attr, cold_attr])
+            .expect("Failed to parse StartFlags");
+        assert!(flags.warm.is_present());
+        assert!(flags.cold.is_present());
+    }
+}

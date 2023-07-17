@@ -106,3 +106,54 @@ impl FromMeta for WrappedDuration {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::parse::util::*;
+
+    #[test]
+    fn test_contains_attribute() {
+        use syn::{parse_quote, Attribute};
+
+        let attr1: Attribute = parse_quote!(#[sample_attr]);
+        let attr2: Attribute = parse_quote!(#[another_attr]);
+
+        let attrs = vec![attr1, attr2];
+
+        assert!(contains_attribute("sample_attr", &attrs));
+        assert!(contains_attribute("another_attr", &attrs));
+        assert!(!contains_attribute("non_existent_attr", &attrs));
+    }
+
+    #[test]
+    fn test_no_return_type() {
+        use syn::{parse_quote, ReturnType};
+
+        let valid_return: ReturnType = parse_quote!(-> ());
+
+        // Function with valid return type
+        assert!(no_return_type("TestFn", &valid_return).is_ok());
+
+        // Function with invalid return type (usize)
+        let invalid_return: ReturnType = parse_quote!(-> usize);
+        assert!(no_return_type("TestFn", &invalid_return).is_err());
+    }
+
+    #[test]
+    fn test_remove_attributes() {
+        use syn::{parse_quote, Attribute};
+
+        let attr1: Attribute = parse_quote!(#[sample_attr]);
+        let attr2: Attribute = parse_quote!(#[another_attr]);
+
+        let mut attrs = vec![attr1, attr2.clone()];
+
+        // Removing an attribute that exists
+        remove_attributes("sample_attr", &mut attrs).unwrap();
+        assert_eq!(attrs, vec![attr2.clone()]);
+
+        // Removing an attribute that does not exist
+        remove_attributes("non_existent_attr", &mut attrs).unwrap();
+        assert_eq!(attrs, vec![attr2]);
+    }
+}
