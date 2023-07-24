@@ -76,7 +76,7 @@ pub mod abstraction {
     use core::time::Duration;
 
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexSamplingPortP1, ApexSamplingPortP4, SamplingPortId, Validity};
+    pub use super::basic::{SamplingPortId, Validity};
     use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;

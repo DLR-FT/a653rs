@@ -92,7 +92,7 @@ pub mod abstraction {
     use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexPartitionP4, NumCores, OperatingMode, PartitionId, StartCondition};
+    pub use super::basic::{NumCores, OperatingMode, PartitionId, StartCondition};
     use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;

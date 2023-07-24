@@ -45,9 +45,9 @@ pub mod abstraction {
     use core::marker::PhantomData;
     use core::slice::from_raw_parts_mut;
 
-    use super::basic::ApexMemoryBlockStatus;
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexMemoryBlockP2, MemoryBlockMode, MemoryBlockName, MemoryBlockSize};
+    pub use super::basic::{MemoryBlockMode, MemoryBlockName, MemoryBlockSize};
+    use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;
 

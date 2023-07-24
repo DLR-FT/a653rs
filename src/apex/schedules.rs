@@ -30,7 +30,8 @@ pub mod basic {
 
 /// abstractions for ARINC653P2-4 3.4 schedules
 pub mod abstraction {
-    use super::basic::{ApexScheduleP2, ApexScheduleStatus, ScheduleId, ScheduleName};
+    use super::basic::{ScheduleId, ScheduleName};
+    use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;
 

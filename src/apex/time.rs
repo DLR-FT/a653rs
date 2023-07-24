@@ -51,7 +51,6 @@ pub mod basic {
 pub mod abstraction {
     use core::time::Duration;
 
-    use super::basic::{ApexTimeP1, ApexTimeP4};
     use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;
