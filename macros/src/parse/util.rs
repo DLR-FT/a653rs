@@ -8,7 +8,7 @@ use syn::{parse_quote, Attribute, FnArg, Ident, ReturnType, Signature};
 pub fn contains_attribute(attr: &str, attrs: &[Attribute]) -> bool {
     attrs
         .iter()
-        .flat_map(|a| a.parse_meta())
+        .map(|a| a.meta.clone())
         .flat_map(|m| m.path().get_ident().cloned())
         .any(|i| i.to_string().eq(attr))
 }
@@ -46,10 +46,10 @@ pub fn single_function_argument(ty: &syn::Type, sig: &Signature) -> syn::Result<
             return Err(syn::Error::new_spanned(t.ty.clone(), msg));
         }
     } else {
-        return Err(syn::Error::new(sig.paren_token.span, msg));
+        return Err(syn::Error::new(sig.paren_token.span.join(), msg));
     }
     if sig.inputs.len() > 1 {
-        return Err(syn::Error::new(sig.paren_token.span, msg));
+        return Err(syn::Error::new(sig.paren_token.span.join(), msg));
     }
     Ok(())
 }
@@ -57,7 +57,7 @@ pub fn single_function_argument(ty: &syn::Type, sig: &Signature) -> syn::Result<
 pub fn remove_attributes(attr: &str, attrs: &mut Vec<Attribute>) -> syn::Result<()> {
     let attr = syn::parse_str::<Ident>(attr)?;
     attrs.retain(|a| {
-        a.path
+        a.path()
             .segments
             .first()
             .map_or_else(|| true, |p| !p.ident.eq(&attr))

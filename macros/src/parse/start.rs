@@ -9,17 +9,8 @@ use crate::parse::util::{no_return_type, remove_attributes, single_function_argu
 
 #[derive(Debug, Copy, Clone, AsRefStr)]
 enum StartType {
-    Warm(Span),
-    Cold(Span),
-}
-
-impl StartType {
-    fn span(&self) -> &Span {
-        match self {
-            StartType::Warm(s) => s,
-            StartType::Cold(s) => s,
-        }
-    }
+    Warm,
+    Cold,
 }
 
 #[derive(Debug, Clone, FromAttributes)]
@@ -33,10 +24,10 @@ impl From<StartFlags> for Vec<StartType> {
     fn from(value: StartFlags) -> Self {
         let mut flags = vec![];
         if value.warm.is_present() {
-            flags.push(StartType::Warm(value.warm.span()))
+            flags.push(StartType::Warm)
         }
         if value.cold.is_present() {
-            flags.push(StartType::Cold(value.cold.span()))
+            flags.push(StartType::Cold)
         }
         flags
     }
@@ -87,8 +78,8 @@ impl Start {
                 remove_attributes("start", &mut item.attrs)?;
 
                 let leftover = match start {
-                    StartType::Warm(_) => warm.replace(item.clone()),
-                    StartType::Cold(_) => cold.replace(item.clone()),
+                    StartType::Warm => warm.replace(item.clone()),
+                    StartType::Cold => cold.replace(item.clone()),
                 };
                 if let Some(leftover) = leftover {
                     let mut err = syn::Error::new(
