@@ -73,9 +73,7 @@ pub mod abstraction {
     use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{
-        ApexQueuingPortP1, ApexQueuingPortP4, QueuingPortId, QueuingPortStatus,
-    };
+    pub use super::basic::{QueuingPortId, QueuingPortStatus};
     use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;

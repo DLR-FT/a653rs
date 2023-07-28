@@ -3,7 +3,7 @@ use std::str::FromStr;
 use darling::{FromAttributes, FromMeta};
 use proc_macro2::Ident;
 use quote::format_ident;
-use strum::{Display, EnumDiscriminants, EnumIter, EnumString};
+use strum::{Display, EnumString};
 // use strum::{Display, EnumString, EnumVariantNames, VariantNames};
 use syn::{parse_quote, spanned::Spanned, Attribute, Item, Type};
 
@@ -106,8 +106,7 @@ impl MayFromAttributes for QueuingInProc {
     }
 }
 
-#[derive(Debug, Clone, Display, EnumDiscriminants)]
-#[strum_discriminants(derive(EnumIter))]
+#[derive(Debug, Clone, Display)]
 pub enum Channel {
     SamplingOut(Ident, SamplingOutProc),
     SamplingIn(Ident, SamplingInProc),

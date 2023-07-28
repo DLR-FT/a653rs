@@ -7,8 +7,12 @@ impl Context {
         let ctx = self.get_context_ident();
         parse_quote! {
             impl<'a, H> #ctx <'a, H> {
-                pub fn get_partition_status(&self) -> PartitionStatus {
-                    Partition::get_partition_status()
+                pub fn get_partition_status(&self) -> a653rs::prelude::PartitionStatus {
+                    Partition::get_status()
+                }
+
+                pub fn set_partition_mode(&self, mode: a653rs::prelude::OperatingMode) -> Result<(), Error> {
+                    Partition::set_mode(mode)
                 }
             }
         }

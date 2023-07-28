@@ -29,7 +29,7 @@ strum = ["dep:strum"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"], default-features = false, optional = true }
-strum = { version = "0.24", features = ["derive"], default-features = false, optional = true }
+strum = { version = "0.25", features = ["derive"], default-features = false, optional = true }
 a653rs_macros = { version = "0.3.1", path = "macros", optional = true }
 
 [dev-dependencies]

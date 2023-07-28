@@ -9,17 +9,8 @@ use crate::parse::util::{no_return_type, remove_attributes, single_function_argu
 
 #[derive(Debug, Copy, Clone, AsRefStr)]
 enum StartType {
-    Warm(Span),
-    Cold(Span),
-}
-
-impl StartType {
-    fn span(&self) -> &Span {
-        match self {
-            StartType::Warm(s) => s,
-            StartType::Cold(s) => s,
-        }
-    }
+    Warm,
+    Cold,
 }
 
 #[derive(Debug, Clone, FromAttributes)]
@@ -29,32 +20,16 @@ struct StartFlags {
     cold: Flag,
 }
 
-impl TryFrom<StartFlags> for Option<StartType> {
-    type Error = syn::Error;
-
-    fn try_from(value: StartFlags) -> Result<Self, Self::Error> {
+impl From<StartFlags> for Vec<StartType> {
+    fn from(value: StartFlags) -> Self {
         let mut flags = vec![];
         if value.warm.is_present() {
-            flags.push(StartType::Warm(value.warm.span()))
+            flags.push(StartType::Warm)
         }
         if value.cold.is_present() {
-            flags.push(StartType::Cold(value.cold.span()))
+            flags.push(StartType::Cold)
         }
-        match flags.len() {
-            0 => Ok(None),
-            1 => Ok(Some(flags[0])),
-            _ => {
-                let mut flags = flags.iter();
-                let mut err = syn::Error::new(
-                    *flags.next().unwrap().span(),
-                    "Multiple start flags attached to same function.",
-                );
-                for (i, flag) in flags.enumerate() {
-                    err.combine(syn::Error::new(*flag.span(), format!("{}th flag", i + 2)))
-                }
-                Err(err)
-            }
-        }
+        flags
     }
 }
 
@@ -97,28 +72,23 @@ impl Start {
             _ => None,
         }) {
             let start = StartFlags::from_attributes(&item.attrs)?;
-            let start: Option<StartType> = start.try_into()?;
-            let start = if let Some(start) = start {
-                start
-            } else {
-                continue;
-            };
+            let starts: Vec<StartType> = start.into();
+            for start in starts {
+                // Remove start attributes from item
+                remove_attributes("start", &mut item.attrs)?;
 
-            // Remove start attributes from item //
-            remove_attributes("start", &mut item.attrs)?;
-            // Remove start attributes from item //
-
-            let leftover = match start {
-                StartType::Warm(_) => warm.replace(item.clone()),
-                StartType::Cold(_) => cold.replace(item.clone()),
-            };
-            if let Some(leftover) = leftover {
-                let mut err = syn::Error::new(
-                    item.span(),
-                    format!("{}Start already defined", start.as_ref()),
-                );
-                err.combine(syn::Error::new(leftover.span(), "First definition here"));
-                return Err(err);
+                let leftover = match start {
+                    StartType::Warm => warm.replace(item.clone()),
+                    StartType::Cold => cold.replace(item.clone()),
+                };
+                if let Some(leftover) = leftover {
+                    let mut err = syn::Error::new(
+                        item.span(),
+                        format!("{}Start already defined", start.as_ref()),
+                    );
+                    err.combine(syn::Error::new(leftover.span(), "First definition here"));
+                    return Err(err);
+                }
             }
         }
         Start {
@@ -128,5 +98,27 @@ impl Start {
                 .ok_or_else(|| syn::Error::new(root.span(), "No 'start(cold)' function defnied"))?,
         }
         .verify_fn_form()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use syn::parse_quote;
+
+    use crate::parse::start::*;
+
+    #[test]
+    fn test_start_flags_from_attributes_both_present() {
+        use darling::FromAttributes;
+
+        // Mock attributes
+        let warm_attr = parse_quote!(#[start(warm)]);
+        let cold_attr = parse_quote!(#[start(cold)]);
+
+        // Test case: Both warm and cold attributes are present
+        let flags: StartFlags = StartFlags::from_attributes(&[warm_attr, cold_attr])
+            .expect("Failed to parse StartFlags");
+        assert!(flags.warm.is_present());
+        assert!(flags.cold.is_present());
     }
 }
