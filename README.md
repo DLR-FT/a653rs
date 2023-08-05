@@ -1,4 +1,16 @@
-# a653rs
+# a653rs [![Latest Version]][crates.io] [![a653rs]][docs.rs] [![a653rs_macros]][docs.rs (macros)] [![Zenodo]][DOI]
+
+[Latest Version]: https://img.shields.io/crates/v/a653rs.svg
+[crates.io]: https://crates.io/crates/a653rs
+
+[a653rs]: https://img.shields.io/badge/docs.rs-a653rs-blue?logo=docs.rs
+[docs.rs]: https://docs.rs/a653rs/latest/a653rs
+
+[a653rs_macros]: https://img.shields.io/badge/docs.rs-a653rs_macros-blue?logo=docs.rs
+[docs.rs (macros)]: https://docs.rs/a653rs_macros/latest/a653rs_macros
+
+[DOI]: https://zenodo.org/doi/10.5281/zenodo.10401000
+[Zenodo]: https://zenodo.org/badge/542500469.svg
 
 Required Services
 https://www.aviation-ia.com/support-files/arinc653h
