@@ -33,7 +33,7 @@ mod partition;
 ///     struct Channel1;
 ///
 ///     #[sampling_in(refresh_period = "500ms")]
-///     #[sampling_in(msg_size = "25KB")]
+///     #[sampling_in(name = "[ChannelTwo]", msg_size = "25KB")]
 ///     struct ChannelTwo;
 ///
 ///     #[queuing_out(msg_count = 20, msg_size = "12KB", discipline = "FIFO")]

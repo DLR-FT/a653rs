@@ -2,14 +2,38 @@ use std::str::FromStr;
 
 use darling::{FromAttributes, FromMeta};
 use proc_macro2::Ident;
-use quote::format_ident;
 use strum::{Display, EnumString};
-// use strum::{Display, EnumString, EnumVariantNames, VariantNames};
-use syn::{parse_quote, spanned::Spanned, Attribute, Item, Type};
+use syn::spanned::Spanned;
+use syn::{parse_quote, Attribute, Item, Type};
 
 use crate::parse::util::{
     contains_attribute, remove_attributes, MayFromAttributes, WrappedByteSize, WrappedDuration,
 };
+
+#[derive(Debug, Default, Clone, Eq, PartialEq)]
+pub struct ApexName(String);
+
+impl FromMeta for ApexName {
+    fn from_string(value: &str) -> darling::Result<Self> {
+        if !value.is_ascii() {
+            Err(darling::Error::custom(
+                "Port name contains not ASCII-printable characters",
+            ))
+        } else if value.len() > 16 {
+            Err(darling::Error::custom(
+                "Port name must be 16 ASCII characters or less wide",
+            ))
+        } else {
+            Ok(Self(value.to_string()))
+        }
+    }
+}
+
+impl ToString for ApexName {
+    fn to_string(&self) -> String {
+        self.0.clone()
+    }
+}
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, EnumString, Display)]
 #[strum(ascii_case_insensitive)]
@@ -28,8 +52,8 @@ impl FromMeta for QueuingDiscipline {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(sampling_out))]
 pub struct SamplingOutProc {
-    #[darling(default = "String::default")]
-    pub name: String,
+    #[darling(default = "ApexName::default")]
+    pub name: ApexName,
     pub msg_size: WrappedByteSize,
 }
 
@@ -47,8 +71,8 @@ impl MayFromAttributes for SamplingOutProc {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(sampling_in))]
 pub struct SamplingInProc {
-    #[darling(default = "String::default")]
-    pub name: String,
+    #[darling(default = "ApexName::default")]
+    pub name: ApexName,
     pub msg_size: WrappedByteSize,
     pub refresh_period: WrappedDuration,
 }
@@ -67,8 +91,8 @@ impl MayFromAttributes for SamplingInProc {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(queuing_out))]
 pub struct QueuingOutProc {
-    #[darling(default = "String::default")]
-    pub name: String,
+    #[darling(default = "ApexName::default")]
+    pub name: ApexName,
     pub msg_size: WrappedByteSize,
     pub msg_count: usize,
     pub discipline: QueuingDiscipline,
@@ -88,8 +112,8 @@ impl MayFromAttributes for QueuingOutProc {
 #[derive(Debug, Clone, FromAttributes)]
 #[darling(attributes(queuing_in))]
 pub struct QueuingInProc {
-    #[darling(default = "String::default")]
-    pub name: String,
+    #[darling(default = "ApexName::default")]
+    pub name: ApexName,
     pub msg_size: WrappedByteSize,
     pub msg_count: usize,
     pub discipline: QueuingDiscipline,
@@ -126,15 +150,14 @@ impl Channel {
     }
 
     /// Solely used for the static name
-    pub fn name(&self) -> Ident {
+    pub fn name(&self) -> ApexName {
         match self {
-            Channel::SamplingOut(ident, port) => {
-                format_ident!("{}", port.name, span = ident.span())
-            }
-            Channel::SamplingIn(ident, ch) => format_ident!("{}", ch.name, span = ident.span()),
-            Channel::QueuingOut(ident, ch) => format_ident!("{}", ch.name, span = ident.span()),
-            Channel::QueuingIn(ident, ch) => format_ident!("{}", ch.name, span = ident.span()),
+            Channel::SamplingOut(_ident, ch) => &ch.name,
+            Channel::SamplingIn(_ident, ch) => &ch.name,
+            Channel::QueuingOut(_ident, ch) => &ch.name,
+            Channel::QueuingIn(_ident, ch) => &ch.name,
         }
+        .clone()
     }
 
     pub fn typ(&self) -> Type {
@@ -168,33 +191,43 @@ impl Channel {
                 Item::Struct(mut item) => {
                     let mut vec: Vec<Option<darling::Result<Channel>>> = vec![
                         SamplingOutProc::may_from_attributes(&mut item.attrs).map(|x| {
+                            let alt_name: ApexName =
+                                FromMeta::from_string(&item.ident.to_string())?;
+
                             x.map(|mut x| {
-                                if x.name.is_empty() {
-                                    x.name = item.ident.to_string();
+                                if x.name.0.is_empty() {
+                                    x.name = alt_name;
                                 }
                                 Channel::SamplingOut(item.ident.clone(), x)
                             })
                         }),
                         SamplingInProc::may_from_attributes(&mut item.attrs).map(|x| {
+                            let alt_name: ApexName =
+                                FromMeta::from_string(&item.ident.to_string())?;
+
                             x.map(|mut x| {
-                                if x.name.is_empty() {
-                                    x.name = item.ident.to_string();
+                                if x.name.0.is_empty() {
+                                    x.name = alt_name;
                                 }
                                 Channel::SamplingIn(item.ident.clone(), x)
                             })
                         }),
                         QueuingOutProc::may_from_attributes(&mut item.attrs).map(|x| {
+                            let alt_name: ApexName =
+                                FromMeta::from_string(&item.ident.to_string())?;
                             x.map(|mut x| {
-                                if x.name.is_empty() {
-                                    x.name = item.ident.to_string();
+                                if x.name.0.is_empty() {
+                                    x.name = alt_name;
                                 }
                                 Channel::QueuingOut(item.ident.clone(), x)
                             })
                         }),
                         QueuingInProc::may_from_attributes(&mut item.attrs).map(|x| {
+                            let alt_name: ApexName =
+                                FromMeta::from_string(&item.ident.to_string())?;
                             x.map(|mut x| {
-                                if x.name.is_empty() {
-                                    x.name = item.ident.to_string();
+                                if x.name.0.is_empty() {
+                                    x.name = alt_name;
                                 }
                                 Channel::QueuingIn(item.ident.clone(), x)
                             })
@@ -224,5 +257,33 @@ impl Channel {
             })
             .collect::<Result<Vec<_>, _>>()?;
         Ok(channel)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use darling::FromMeta;
+
+    use super::ApexName;
+
+    #[test]
+    fn long_port_name() {
+        let port = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        let port: darling::Result<ApexName> = FromMeta::from_string(port);
+        assert!(port.is_err());
+    }
+
+    #[test]
+    fn ascii_printable_name() {
+        let port = "[AA!-=-14**\\";
+        let port: darling::Result<ApexName> = FromMeta::from_string(port);
+        assert!(port.is_ok());
+    }
+
+    #[test]
+    fn non_ascii_printable_name() {
+        let port = "\u{7FFF}";
+        let port: darling::Result<ApexName> = FromMeta::from_string(port);
+        assert!(port.is_err());
     }
 }
