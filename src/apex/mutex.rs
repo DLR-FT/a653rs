@@ -104,7 +104,7 @@ pub mod abstraction {
     use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{LockCount, MutexId, MutexName, MutexStatus};
+    pub use super::basic::{ApexMutexP1, LockCount, MutexId, MutexName, MutexStatus};
     use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;

@@ -117,7 +117,7 @@ pub mod abstraction {
     use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{BlackboardId, BlackboardStatus};
+    pub use super::basic::{ApexBlackboardP1, BlackboardId, BlackboardStatus};
     use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;
