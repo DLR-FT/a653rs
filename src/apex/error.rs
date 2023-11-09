@@ -118,7 +118,8 @@ pub mod basic {
 pub mod abstraction {
     // Reexport important basic-types for downstream-user
     pub use super::basic::{
-        ErrorCode, ErrorHandlerConcurrencyControl, ErrorStatus, MAX_ERROR_MESSAGE_SIZE,
+        ApexErrorP1, ApexErrorP4, ErrorCode, ErrorHandlerConcurrencyControl, ErrorStatus,
+        MAX_ERROR_MESSAGE_SIZE,
     };
     use crate::bindings::*;
     use crate::hidden::Key;

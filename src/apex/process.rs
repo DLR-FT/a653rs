@@ -170,7 +170,8 @@ pub mod abstraction {
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{
-        Deadline, LockLevel, Priority, ProcessId, ProcessIndex, ProcessName, StackSize,
+        ApexProcessP1, ApexProcessP4, Deadline, LockLevel, Priority, ProcessId, ProcessIndex,
+        ProcessName, StackSize,
     };
     use crate::bindings::*;
     use crate::hidden::Key;

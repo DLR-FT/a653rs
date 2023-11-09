@@ -91,7 +91,7 @@ pub mod abstraction {
     use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{SemaphoreId, SemaphoreStatus, SemaphoreValue};
+    pub use super::basic::{ApexSemaphoreP1, SemaphoreId, SemaphoreStatus, SemaphoreValue};
     use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;

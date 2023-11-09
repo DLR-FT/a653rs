@@ -103,7 +103,7 @@ pub mod abstraction {
     use core::sync::atomic::AtomicPtr;
 
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{BufferId, BufferStatus};
+    pub use super::basic::{ApexBufferP1, BufferId, BufferStatus};
     use crate::bindings::*;
     use crate::hidden::Key;
     use crate::prelude::*;
