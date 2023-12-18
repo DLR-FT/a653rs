@@ -1,5 +1,6 @@
 {
   inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     utils.url = "github:numtide/flake-utils";
     devshell.url = "github:numtide/devshell";
     fenix.url = "github:nix-community/fenix";
