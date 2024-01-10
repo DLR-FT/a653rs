@@ -191,46 +191,41 @@ impl Channel {
                 Item::Struct(mut item) => {
                     let mut vec: Vec<Option<darling::Result<Channel>>> = vec![
                         SamplingOutProc::may_from_attributes(&mut item.attrs).map(|x| {
-                            let alt_name: ApexName =
-                                FromMeta::from_string(&item.ident.to_string())?;
-
-                            x.map(|mut x| {
-                                if x.name.0.is_empty() {
-                                    x.name = alt_name;
-                                }
-                                Channel::SamplingOut(item.ident.clone(), x)
-                            })
+                            let mut x = x?;
+                            if x.name.0.is_empty() {
+                                let alt_name: ApexName =
+                                    FromMeta::from_string(&item.ident.to_string())?;
+                                x.name = alt_name;
+                            }
+                            darling::Result::Ok(Channel::SamplingOut(item.ident.clone(), x))
                         }),
                         SamplingInProc::may_from_attributes(&mut item.attrs).map(|x| {
-                            let alt_name: ApexName =
-                                FromMeta::from_string(&item.ident.to_string())?;
+                            let mut x = x?;
+                            if x.name.0.is_empty() {
+                                let alt_name: ApexName =
+                                    FromMeta::from_string(&item.ident.to_string())?;
 
-                            x.map(|mut x| {
-                                if x.name.0.is_empty() {
-                                    x.name = alt_name;
-                                }
-                                Channel::SamplingIn(item.ident.clone(), x)
-                            })
+                                x.name = alt_name;
+                            }
+                            darling::Result::Ok(Channel::SamplingIn(item.ident.clone(), x))
                         }),
                         QueuingOutProc::may_from_attributes(&mut item.attrs).map(|x| {
-                            let alt_name: ApexName =
-                                FromMeta::from_string(&item.ident.to_string())?;
-                            x.map(|mut x| {
-                                if x.name.0.is_empty() {
-                                    x.name = alt_name;
-                                }
-                                Channel::QueuingOut(item.ident.clone(), x)
-                            })
+                            let mut x = x?;
+                            if x.name.0.is_empty() {
+                                let alt_name: ApexName =
+                                    FromMeta::from_string(&item.ident.to_string())?;
+                                x.name = alt_name;
+                            }
+                            darling::Result::Ok(Channel::QueuingOut(item.ident.clone(), x))
                         }),
                         QueuingInProc::may_from_attributes(&mut item.attrs).map(|x| {
-                            let alt_name: ApexName =
-                                FromMeta::from_string(&item.ident.to_string())?;
-                            x.map(|mut x| {
-                                if x.name.0.is_empty() {
-                                    x.name = alt_name;
-                                }
-                                Channel::QueuingIn(item.ident.clone(), x)
-                            })
+                            let mut x = x?;
+                            if x.name.0.is_empty() {
+                                let alt_name: ApexName =
+                                    FromMeta::from_string(&item.ident.to_string())?;
+                                x.name = alt_name;
+                            }
+                            darling::Result::Ok(Channel::QueuingIn(item.ident.clone(), x))
                         }),
                     ];
                     let vec: Vec<_> = vec
