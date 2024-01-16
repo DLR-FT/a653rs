@@ -296,7 +296,6 @@ mod partition;
 /// - **NAME**: name used for internal apex calls (optional)  
 /// - **MSG_COUNT**: [u32]
 /// - **MSG_SIZE**: size like ["10KB", "16kiB", "12Mb", ...](https://crates.io/crates/bytesize)
-/// - **REFRESH_PERIOD**: time like ["10ms", "16s", "18m", ...](https://crates.io/crates/humantime)
 /// - **DISCIPLINE**: either "FIFO" or "Priority"
 ///
 /// ## Flexibility
