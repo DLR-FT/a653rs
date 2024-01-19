@@ -42,21 +42,18 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS](crate::apex::limits::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS) was reached
         /// - [ErrorReturnCode::NoAction]: an event with given `event_name` already exists
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_event(event_name: EventName) -> Result<EventId, ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.2 changes events state to [EventState::Up]
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: event with `event_id` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn set_event(event_id: EventId) -> Result<(), ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.3 changes events state to [EventState::Down]
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: event with `event_id` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn reset_event(event_id: EventId) -> Result<(), ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.4
@@ -68,21 +65,18 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidMode]: current process is error handler AND `time_out` is not instant.
         /// - [ErrorReturnCode::NotAvailable]: `time_out` is instant AND event is [EventState::Down]
         /// - [ErrorReturnCode::TimedOut]: `time_out` elapsed
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn wait_event(event_id: EventId, time_out: ApexSystemTime) -> Result<(), ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.5
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: event with `event_name` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_event_id(event_name: EventName) -> Result<EventId, ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.6
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: event with `event_id` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_event_status(event_id: EventId) -> Result<EventStatus, ErrorReturnCode>;
     }
 }

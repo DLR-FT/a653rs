@@ -11,11 +11,8 @@ pub mod basic {
     pub type ScheduleId = ApexLongInteger;
 
     pub trait ApexScheduleP2 {
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn set_module_schedule(schedule_id: ScheduleId) -> Result<(), ErrorReturnCode>;
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_module_schedule_status() -> Result<ApexScheduleStatus, ErrorReturnCode>;
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_module_schedule_id(
             schedule_name: ScheduleName,
         ) -> Result<ScheduleId, ErrorReturnCode>;

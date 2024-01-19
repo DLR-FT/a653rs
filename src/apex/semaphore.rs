@@ -56,7 +56,6 @@ pub mod basic {
 
     pub trait ApexSemaphoreP1 {
         // Only during Warm/Cold-Start
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_semaphore(
             semaphore_name: SemaphoreName,
             current_value: SemaphoreValue,
@@ -64,19 +63,15 @@ pub mod basic {
             queuing_discipline: QueuingDiscipline,
         ) -> Result<SemaphoreId, ErrorReturnCode>;
 
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn wait_semaphore(
             semaphore_id: SemaphoreId,
             time_out: ApexSystemTime,
         ) -> Result<(), ErrorReturnCode>;
 
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn signal_semaphore(semaphore_id: SemaphoreId) -> Result<(), ErrorReturnCode>;
 
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_semaphore_id(semaphore_name: SemaphoreName) -> Result<SemaphoreId, ErrorReturnCode>;
 
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_semaphore_status(
             semaphore_id: SemaphoreId,
         ) -> Result<SemaphoreStatus, ErrorReturnCode>;

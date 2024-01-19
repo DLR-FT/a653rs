@@ -13,7 +13,6 @@ pub mod basic {
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: memory block with `memory_block_name` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_memory_block_status(
             memory_block_name: MemoryBlockName,
         ) -> Result<ApexMemoryBlockStatus, ErrorReturnCode>;

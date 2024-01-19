@@ -15,11 +15,9 @@ pub mod basic {
         /// - (P1/P2 only) [ErrorReturnCode::InvalidMode]: calling process holds a mutex
         /// - (P1/P2 only) [ErrorReturnCode::InvalidMode]: calling process is error handler
         /// - (P1/P2 only) [ErrorReturnCode::InvalidConfig]: deadline calulation failed
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn periodic_wait() -> Result<(), ErrorReturnCode>;
 
         /// APEX653P4 3.4.2.3
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_time() -> ApexSystemTime;
     }
 
@@ -32,7 +30,6 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidMode]: calling process is error handler
         /// - [ErrorReturnCode::InvalidParam]: `delay_time` is too large
         /// - [ErrorReturnCode::InvalidParam]: `delay_time` is negative (infinite)
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn timed_wait(delay_time: ApexSystemTime) -> Result<(), ErrorReturnCode>;
 
         /// ARINC653P1-5 3.4.2.4 update deadline
@@ -42,7 +39,6 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidMode]: calling process is periodic AND calulated deadline exceeds next release point
         /// - [ErrorReturnCode::NoAction]: calling process is error handler
         /// - [ErrorReturnCode::NoAction]: our current operating mode is not [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn replenish(budget_time: ApexSystemTime) -> Result<(), ErrorReturnCode>;
     }
 }

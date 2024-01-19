@@ -61,7 +61,6 @@ pub mod basic {
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: `message` is too large
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn report_application_message(message: &[ApexByte]) -> Result<(), ErrorReturnCode>;
 
         /// APEX653P4 3.8.2.4 trigger error handler process
@@ -69,7 +68,6 @@ pub mod basic {
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: `message` is larger than [MAX_ERROR_MESSAGE_SIZE]
         /// - [ErrorReturnCode::InvalidParam]: `error_code` is not [ErrorCode::ApplicationError]
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn raise_application_error(
             error_code: ErrorCode,
             message: &[ApexByte],
@@ -85,7 +83,6 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidConfig]: not enough memory is available
         /// - [ErrorReturnCode::InvalidConfig]: `stack_size` is too large
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_error_handler(
             entry_point: SystemAddress,
             stack_size: StackSize,
@@ -96,7 +93,6 @@ pub mod basic {
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: the calling process is not an error handler
         /// - [ErrorReturnCode::NoAction]: no error exists right now
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_error_status() -> Result<ErrorStatus, ErrorReturnCode>;
 
         /// APEX653P1-5 3.8.2.5
@@ -104,7 +100,6 @@ pub mod basic {
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: no error handler exists
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn configure_error_handler(
             concurrency_control: ErrorHandlerConcurrencyControl,
             processor_core_id: ProcessorCoreId,

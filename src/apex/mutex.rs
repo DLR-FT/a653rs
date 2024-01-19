@@ -55,7 +55,6 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidParam]: `mutex_priority` is invalid
         /// - [ErrorReturnCode::InvalidParam]: [QueuingDiscipline](crate::apex::types::basic::QueuingDiscipline) in `queuing_discipline` is unsupported
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_mutex(
             mutex_name: MutexName,
             mutex_priority: Priority,
@@ -72,25 +71,19 @@ pub mod basic {
         /// - [ErrorReturnCode::NotAvailable]:
         /// - [ErrorReturnCode::TimedOut]: `time_out` elapsed
         /// - [ErrorReturnCode::InvalidConfig]: lock count of given mutex is at [MAX_LOCK_LEVEL](crate::apex::process::basic::MAX_LOCK_LEVEL)
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn acquire_mutex(
             mutex_id: MutexId,
             time_out: ApexSystemTime,
         ) -> Result<(), ErrorReturnCode>;
 
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn release_mutex(mutex_id: MutexId) -> Result<(), ErrorReturnCode>;
 
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn reset_mutex(mutex_id: MutexId, process_id: ProcessId) -> Result<(), ErrorReturnCode>;
 
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_mutex_id(mutex_name: MutexName) -> Result<MutexId, ErrorReturnCode>;
 
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_mutex_status(mutex_id: MutexId) -> Result<MutexStatus, ErrorReturnCode>;
 
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_process_mutex_state(process_id: ProcessId) -> Result<MutexId, ErrorReturnCode>;
     }
 }
