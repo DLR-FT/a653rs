@@ -1,6 +1,6 @@
 /// bindings for ARINC653P1-5 3.4.2 time
 pub mod basic {
-    use crate::bindings::*;
+    use crate::apex::types::basic::*;
 
     /// ARINC653P1-5 3.4.1
     pub type ApexSystemTime = ApexLongInteger;
@@ -33,7 +33,7 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidParam]: `delay_time` is too large
         /// - [ErrorReturnCode::InvalidParam]: `delay_time` is negative (infinite)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn timed_wait<L: Locked>(delay_time: ApexSystemTime) -> Result<(), ErrorReturnCode>;
+        fn timed_wait(delay_time: ApexSystemTime) -> Result<(), ErrorReturnCode>;
 
         /// ARINC653P1-5 3.4.2.4 update deadline
         ///
@@ -43,7 +43,7 @@ pub mod basic {
         /// - [ErrorReturnCode::NoAction]: calling process is error handler
         /// - [ErrorReturnCode::NoAction]: our current operating mode is not [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn replenish<L: Locked>(budget_time: ApexSystemTime) -> Result<(), ErrorReturnCode>;
+        fn replenish(budget_time: ApexSystemTime) -> Result<(), ErrorReturnCode>;
     }
 }
 
@@ -51,9 +51,7 @@ pub mod basic {
 pub mod abstraction {
     use core::time::Duration;
 
-    use super::basic::{ApexTimeP1, ApexTimeP4};
-    use crate::bindings::*;
-    use crate::hidden::Key;
+    use super::basic::{ApexSystemTime, ApexTimeP1, ApexTimeP4, INFINITE_TIME_VALUE};
     use crate::prelude::*;
 
     /// Abstracted SystemTime Variant making use of Rusts [Duration]
@@ -176,18 +174,18 @@ pub mod abstraction {
         /// - [Error::InvalidParam]: `budget_time` is invalid
         /// - [Error::InvalidMode]: calling process is periodic AND calulated deadline exceeds next release point
         /// - [Error::NoAction]: calling process is error handler
-        /// - [Error::NoAction]: our current operating mode is not [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
+        /// - [Error::NoAction]: our current operating mode is not [OperatingMode::Normal]
         fn replenish(budget_time: Duration) -> Result<(), Error>;
     }
 
     impl<T: ApexTimeP1> ApexTimeP1Ext for T {
         fn timed_wait(delay_time: Duration) -> Result<(), Error> {
-            T::timed_wait::<Key>(SystemTime::Normal(delay_time).into())?;
+            T::timed_wait(SystemTime::Normal(delay_time).into())?;
             Ok(())
         }
 
         fn replenish(budget_time: Duration) -> Result<(), Error> {
-            T::replenish::<Key>(SystemTime::Normal(budget_time).into())?;
+            T::replenish(SystemTime::Normal(budget_time).into())?;
             Ok(())
         }
     }

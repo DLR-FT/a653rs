@@ -1,6 +1,7 @@
 /// bindings for ARINC653P1-5 3.3 process
 pub mod basic {
-    use crate::bindings::*;
+    use crate::apex::time::basic::*;
+    use crate::apex::types::basic::*;
 
     /// ARINC653P1-5 3.3.1
     pub type ProcessName = ApexName;
@@ -83,7 +84,7 @@ pub mod basic {
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: not enough memory is available
-        /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_PROCESSES](crate::bindings::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_PROCESSES) was reached
+        /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_PROCESSES](crate::apex::limits::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_PROCESSES) was reached
         /// - [ErrorReturnCode::NoAction]: a process with given `attributes.name` already exists
         /// - [ErrorReturnCode::InvalidParam]: `attributes.stack_size` is invalid
         /// - [ErrorReturnCode::InvalidParam]: `attributes.base_priority` is invalid
@@ -93,73 +94,64 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidParam]: `attributes.period` is positive and `attributes.period` is less than `attributes.time_capacity`
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn create_process<L: Locked>(
-            attributes: &ApexProcessAttribute,
-        ) -> Result<ProcessId, ErrorReturnCode>;
+        fn create_process(attributes: &ApexProcessAttribute) -> Result<ProcessId, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn start<L: Locked>(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
+        fn start(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
     }
 
     pub trait ApexProcessP1: ApexProcessP4 {
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn set_priority<L: Locked>(
-            process_id: ProcessId,
-            priority: Priority,
-        ) -> Result<(), ErrorReturnCode>;
+        fn set_priority(process_id: ProcessId, priority: Priority) -> Result<(), ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn suspend_self<L: Locked>(time_out: ApexSystemTime) -> Result<(), ErrorReturnCode>;
+        fn suspend_self(time_out: ApexSystemTime) -> Result<(), ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn suspend<L: Locked>(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
+        fn suspend(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn resume<L: Locked>(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
+        fn resume(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn stop_self<L: Locked>();
+        fn stop_self();
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn stop<L: Locked>(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
+        fn stop(process_id: ProcessId) -> Result<(), ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn delayed_start<L: Locked>(
+        fn delayed_start(
             process_id: ProcessId,
             delay_time: ApexSystemTime,
         ) -> Result<(), ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn lock_preemption<L: Locked>() -> Result<LockLevel, ErrorReturnCode>;
+        fn lock_preemption() -> Result<LockLevel, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn unlock_preemption<L: Locked>() -> Result<LockLevel, ErrorReturnCode>;
+        fn unlock_preemption() -> Result<LockLevel, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_my_id<L: Locked>() -> Result<ProcessId, ErrorReturnCode>;
+        fn get_my_id() -> Result<ProcessId, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_process_id<L: Locked>(
-            process_name: ProcessName,
-        ) -> Result<ProcessId, ErrorReturnCode>;
+        fn get_process_id(process_name: ProcessName) -> Result<ProcessId, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_process_status<L: Locked>(
-            process_id: ProcessId,
-        ) -> Result<ApexProcessStatus, ErrorReturnCode>;
+        fn get_process_status(process_id: ProcessId) -> Result<ApexProcessStatus, ErrorReturnCode>;
 
         // Only during Warm/Cold-Start
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn initialize_process_core_affinity<L: Locked>(
+        fn initialize_process_core_affinity(
             process_id: ProcessId,
             processor_core_id: ProcessorCoreId,
         ) -> Result<(), ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_my_processor_core_id<L: Locked>() -> ProcessorCoreId;
+        fn get_my_processor_core_id() -> ProcessorCoreId;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_my_index<L: Locked>() -> Result<ProcessIndex, ErrorReturnCode>;
+        fn get_my_index() -> Result<ProcessIndex, ErrorReturnCode>;
     }
 }
 
@@ -168,13 +160,13 @@ pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;
 
+    use super::basic::{ApexProcessAttribute, ApexProcessP1, ApexProcessP4, ApexProcessStatus};
     // Reexport important basic-types for downstream-user
     pub use super::basic::{
-        ApexProcessP1, ApexProcessP4, Deadline, LockLevel, Priority, ProcessId, ProcessIndex,
-        ProcessName, StackSize,
+        Deadline, LockLevel, Priority, ProcessId, ProcessIndex, ProcessName, StackSize,
+        SystemAddress, MAIN_PROCESS_ID, MAX_LOCK_LEVEL, MAX_PRIORITY_VALUE, MIN_LOCK_LEVEL,
+        MIN_PRIORITY_VALUE, NULL_PROCESS_ID,
     };
-    use crate::bindings::*;
-    use crate::hidden::Key;
     use crate::prelude::*;
 
     #[derive(Debug, Clone, PartialEq, Eq)]
@@ -256,7 +248,7 @@ pub mod abstraction {
 
     impl<P: ApexProcessP1> ApexProcessP1Ext for P {
         fn get_process(name: Name) -> Result<Process<P>, Error> {
-            let id = P::get_process_id::<Key>(name.into())?;
+            let id = P::get_process_id(name.into())?;
             Ok(Process {
                 _p: Default::default(),
                 id,
@@ -266,7 +258,7 @@ pub mod abstraction {
 
     impl<P: ApexProcessP4> Process<P> {
         pub fn start(&self) -> Result<(), Error> {
-            P::start::<Key>(self.id)?;
+            P::start(self.id)?;
             Ok(())
         }
 
@@ -281,7 +273,7 @@ pub mod abstraction {
         }
 
         pub fn get_self() -> Result<Process<P>, Error> {
-            let id = P::get_my_id::<Key>()?;
+            let id = P::get_my_id()?;
             Ok(Process {
                 _p: Default::default(),
                 id,
@@ -289,45 +281,45 @@ pub mod abstraction {
         }
 
         pub fn set_priority(&self, priority: Priority) -> Result<(), Error> {
-            P::set_priority::<Key>(self.id, priority)?;
+            P::set_priority(self.id, priority)?;
             Ok(())
         }
 
         pub fn suspend_self(time_out: SystemTime) -> Result<(), Error> {
-            P::suspend_self::<Key>(time_out.into())?;
+            P::suspend_self(time_out.into())?;
             Ok(())
         }
 
         pub fn suspend(&self) -> Result<(), Error> {
-            P::suspend::<Key>(self.id)?;
+            P::suspend(self.id)?;
             Ok(())
         }
 
         pub fn resume(&self) -> Result<(), Error> {
-            P::resume::<Key>(self.id)?;
+            P::resume(self.id)?;
             Ok(())
         }
 
         pub fn stop_self() {
-            P::stop_self::<Key>()
+            P::stop_self()
         }
 
         pub fn stop(&self) -> Result<(), Error> {
-            P::stop::<Key>(self.id)?;
+            P::stop(self.id)?;
             Ok(())
         }
 
         pub fn delayed_start(&self, delay_time: SystemTime) -> Result<(), Error> {
-            P::delayed_start::<Key>(self.id, delay_time.into())?;
+            P::delayed_start(self.id, delay_time.into())?;
             Ok(())
         }
 
         pub fn lock_preemption() -> Result<LockLevel, Error> {
-            Ok(P::lock_preemption::<Key>()?)
+            Ok(P::lock_preemption()?)
         }
 
         pub fn unlock_preemption() -> Result<LockLevel, Error> {
-            Ok(P::unlock_preemption::<Key>()?)
+            Ok(P::unlock_preemption()?)
         }
 
         pub fn status(&self) -> ProcessStatus {
@@ -335,21 +327,21 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the processId directly from the hypervisor
             //  there is no possible way for it not existing
-            P::get_process_status::<Key>(self.id).unwrap().into()
+            P::get_process_status(self.id).unwrap().into()
         }
 
         pub fn get_my_processor_core_id() -> ProcessorCoreId {
-            P::get_my_processor_core_id::<Key>()
+            P::get_my_processor_core_id()
         }
 
         pub fn get_my_index() -> Result<ProcessIndex, Error> {
-            Ok(P::get_my_index::<Key>()?)
+            Ok(P::get_my_index()?)
         }
     }
 
     impl<P: ApexProcessP4> StartContext<P> {
         pub fn create_process(&mut self, attr: ProcessAttribute) -> Result<Process<P>, Error> {
-            let id = P::create_process::<Key>(&attr.into())?;
+            let id = P::create_process(&attr.into())?;
             Ok(Process {
                 _p: Default::default(),
                 id,
@@ -363,7 +355,7 @@ pub mod abstraction {
             process: &Process<P>,
             processor_core_id: ProcessorCoreId,
         ) -> Result<(), Error> {
-            P::initialize_process_core_affinity::<Key>(process.id, processor_core_id)?;
+            P::initialize_process_core_affinity(process.id, processor_core_id)?;
             Ok(())
         }
     }

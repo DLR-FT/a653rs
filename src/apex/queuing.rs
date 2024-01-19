@@ -1,7 +1,7 @@
 /// bindings for ARINC653P1-5 3.6.2.2 queuing
 pub mod basic {
-    use crate::bindings::*;
-    use crate::Locked;
+    use crate::apex::time::basic::*;
+    use crate::apex::types::basic::*;
 
     pub type QueuingPortName = ApexName;
 
@@ -23,7 +23,7 @@ pub mod basic {
     pub trait ApexQueuingPortP4 {
         // Only during Warm/Cold-Start
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn create_queuing_port<L: Locked>(
+        fn create_queuing_port(
             queuing_port_name: QueuingPortName,
             max_message_size: MessageSize,
             max_nb_message: MessageRange,
@@ -32,7 +32,7 @@ pub mod basic {
         ) -> Result<QueuingPortId, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn send_queuing_message<L: Locked>(
+        fn send_queuing_message(
             queuing_port_id: QueuingPortId,
             message: &[ApexByte],
             time_out: ApexSystemTime,
@@ -42,26 +42,24 @@ pub mod basic {
         ///
         /// This function is safe, as long as the buffer can hold whatever is received
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        unsafe fn receive_queuing_message<L: Locked>(
+        unsafe fn receive_queuing_message(
             queuing_port_id: QueuingPortId,
             time_out: ApexSystemTime,
             message: &mut [ApexByte],
         ) -> Result<MessageSize, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_queuing_port_status<L: Locked>(
+        fn get_queuing_port_status(
             queuing_port_id: QueuingPortId,
         ) -> Result<QueuingPortStatus, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn clear_queuing_port<L: Locked>(
-            queuing_port_id: QueuingPortId,
-        ) -> Result<(), ErrorReturnCode>;
+        fn clear_queuing_port(queuing_port_id: QueuingPortId) -> Result<(), ErrorReturnCode>;
     }
 
     pub trait ApexQueuingPortP1: ApexQueuingPortP4 {
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_queuing_port_id<L: Locked>(
+        fn get_queuing_port_id(
             queuing_port_name: QueuingPortName,
         ) -> Result<QueuingPortId, ErrorReturnCode>;
     }
@@ -72,12 +70,10 @@ pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;
 
+    use super::basic::{ApexQueuingPortP1, ApexQueuingPortP4};
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{
-        ApexQueuingPortP1, ApexQueuingPortP4, QueuingPortId, QueuingPortStatus,
-    };
-    use crate::bindings::*;
-    use crate::hidden::Key;
+    pub use super::basic::{QueuingPortId, QueuingPortStatus};
+    use crate::apex::types::basic::PortDirection;
     use crate::prelude::*;
 
     #[derive(Debug)]
@@ -161,7 +157,7 @@ pub mod abstraction {
             buffer: &[ApexByte],
             timeout: SystemTime,
         ) -> Result<(), Error> {
-            Q::send_queuing_message::<Key>(id, buffer, timeout.into())?;
+            Q::send_queuing_message(id, buffer, timeout.into())?;
             Ok(())
         }
 
@@ -170,7 +166,7 @@ pub mod abstraction {
             timeout: SystemTime,
             buffer: &mut [ApexByte],
         ) -> Result<&[ApexByte], Error> {
-            let len = Q::receive_queuing_message::<Key>(id, timeout.into(), buffer)? as usize;
+            let len = Q::receive_queuing_message(id, timeout.into(), buffer)? as usize;
             Ok(&buffer[..len])
         }
     }
@@ -182,7 +178,7 @@ pub mod abstraction {
         fn get_queuing_port_sender<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange>(
             name: Name,
         ) -> Result<QueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
-            let id = Q::get_queuing_port_id::<Key>(name.into())?;
+            let id = Q::get_queuing_port_id(name.into())?;
             // According to ARINC653P1-5 3.6.2.2.5 this can only fail if the queuing_port_id
             //  does not exist in the current partition.
             // But since we retrieve the queuing_port_id directly from the hypervisor
@@ -192,7 +188,7 @@ pub mod abstraction {
                 max_message_size,
                 port_direction,
                 ..
-            } = Q::get_queuing_port_status::<Key>(id).unwrap();
+            } = Q::get_queuing_port_status(id).unwrap();
 
             if max_nb_message != NB_MSGS {
                 return Err(Error::InvalidConfig);
@@ -218,7 +214,7 @@ pub mod abstraction {
         fn get_queuing_port_receiver<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange>(
             name: Name,
         ) -> Result<QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
-            let id = Q::get_queuing_port_id::<Key>(name.into())?;
+            let id = Q::get_queuing_port_id(name.into())?;
             // According to ARINC653P1-5 3.6.2.2.5 this can only fail if the queuing_port_id
             //  does not exist in the current partition.
             // But since we retrieve the queuing_port_id directly from the hypervisor
@@ -228,7 +224,7 @@ pub mod abstraction {
                 max_message_size,
                 port_direction,
                 ..
-            } = Q::get_queuing_port_status::<Key>(id).unwrap();
+            } = Q::get_queuing_port_status(id).unwrap();
 
             if max_nb_message != NB_MSGS {
                 return Err(Error::InvalidConfig);
@@ -274,7 +270,7 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the queuing_port_id directly from the hypervisor
             //  there is no possible way for it not existing
-            Q::get_queuing_port_status::<Key>(self.id).unwrap()
+            Q::get_queuing_port_status(self.id).unwrap()
         }
     }
 
@@ -304,7 +300,7 @@ pub mod abstraction {
             // But since we retrieve the queuing_port_id directly from the hypervisor
             //  and we verify that this is a destination port,
             //  there is no possible way for it not existing
-            Q::clear_queuing_port::<Key>(self.id).unwrap();
+            Q::clear_queuing_port(self.id).unwrap();
         }
 
         pub fn id(&self) -> QueuingPortId {
@@ -324,7 +320,7 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the queuing_port_id directly from the hypervisor
             //  there is no possible way for it not existing
-            Q::get_queuing_port_status::<Key>(self.id).unwrap()
+            Q::get_queuing_port_status(self.id).unwrap()
         }
     }
 
@@ -345,13 +341,8 @@ pub mod abstraction {
             name: Name,
             qd: QueuingDiscipline,
         ) -> Result<QueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
-            let id = Q::create_queuing_port::<Key>(
-                name.into(),
-                MSG_SIZE,
-                NB_MSGS,
-                PortDirection::Source,
-                qd,
-            )?;
+            let id =
+                Q::create_queuing_port(name.into(), MSG_SIZE, NB_MSGS, PortDirection::Source, qd)?;
 
             Ok(QueuingPortSender {
                 _b: Default::default(),
@@ -367,7 +358,7 @@ pub mod abstraction {
             name: Name,
             qd: QueuingDiscipline,
         ) -> Result<QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
-            let id = Q::create_queuing_port::<Key>(
+            let id = Q::create_queuing_port(
                 name.into(),
                 MSG_SIZE,
                 NB_MSGS,

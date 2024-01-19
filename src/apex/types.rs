@@ -113,9 +113,10 @@ pub mod abstraction {
 
     // Reexport important basic-types for downstream-user
     pub use super::basic::{
-        ApexByte, ApexUnsigned, MessageRange, MessageSize, QueuingDiscipline, MAX_NAME_LENGTH,
+        ApexByte, ApexUnsigned, MessageRange, MessageSize, ProcessorCoreId, QueuingDiscipline,
+        CORE_AFFINITY_NO_PREFERENCE, MAX_NAME_LENGTH,
     };
-    use crate::bindings::*;
+    use super::basic::{ApexName, ErrorReturnCode};
 
     /// Error Type used by abstracted functions.  
     /// Includes all Variants of [ErrorReturnCode] plus a `WriteError` and `ReadError` variant

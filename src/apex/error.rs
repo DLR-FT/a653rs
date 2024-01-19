@@ -1,7 +1,7 @@
 /// bindings for ARINC653P1-5 3.8 health monitoring
 pub mod basic {
-    use crate::bindings::*;
-    use crate::Locked;
+    use crate::apex::process::basic::*;
+    use crate::apex::types::basic::*;
 
     /// ARINC653P1-5 3.8.1 Maximum message size in bytes
     pub const MAX_ERROR_MESSAGE_SIZE: usize = 128;
@@ -62,9 +62,7 @@ pub mod basic {
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: `message` is too large
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn report_application_message<L: Locked>(
-            message: &[ApexByte],
-        ) -> Result<(), ErrorReturnCode>;
+        fn report_application_message(message: &[ApexByte]) -> Result<(), ErrorReturnCode>;
 
         /// APEX653P4 3.8.2.4 trigger error handler process
         ///
@@ -72,7 +70,7 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidParam]: `message` is larger than [MAX_ERROR_MESSAGE_SIZE]
         /// - [ErrorReturnCode::InvalidParam]: `error_code` is not [ErrorCode::ApplicationError]
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn raise_application_error<L: Locked>(
+        fn raise_application_error(
             error_code: ErrorCode,
             message: &[ApexByte],
         ) -> Result<(), ErrorReturnCode>;
@@ -88,7 +86,7 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidConfig]: `stack_size` is too large
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn create_error_handler<L: Locked>(
+        fn create_error_handler(
             entry_point: SystemAddress,
             stack_size: StackSize,
         ) -> Result<(), ErrorReturnCode>;
@@ -99,7 +97,7 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidConfig]: the calling process is not an error handler
         /// - [ErrorReturnCode::NoAction]: no error exists right now
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_error_status<L: Locked>() -> Result<ErrorStatus, ErrorReturnCode>;
+        fn get_error_status() -> Result<ErrorStatus, ErrorReturnCode>;
 
         /// APEX653P1-5 3.8.2.5
         ///
@@ -107,7 +105,7 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidConfig]: no error handler exists
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn configure_error_handler<L: Locked>(
+        fn configure_error_handler(
             concurrency_control: ErrorHandlerConcurrencyControl,
             processor_core_id: ProcessorCoreId,
         ) -> Result<(), ErrorReturnCode>;
@@ -116,13 +114,11 @@ pub mod basic {
 
 /// abstraction for ARINC653P1-5 3.8 health monitoring
 pub mod abstraction {
+    use super::basic::{ApexErrorP1, ApexErrorP4};
     // Reexport important basic-types for downstream-user
     pub use super::basic::{
-        ApexErrorP1, ApexErrorP4, ErrorCode, ErrorHandlerConcurrencyControl, ErrorStatus,
-        MAX_ERROR_MESSAGE_SIZE,
+        ErrorCode, ErrorHandlerConcurrencyControl, ErrorStatus, MAX_ERROR_MESSAGE_SIZE,
     };
-    use crate::bindings::*;
-    use crate::hidden::Key;
     use crate::prelude::*;
 
     /// Free extra functions for implementer of [ApexErrorP4]
@@ -152,14 +148,12 @@ pub mod abstraction {
 
     impl<E: ApexErrorP4> ApexErrorP4Ext for E {
         fn report_application_message(message: &[ApexByte]) -> Result<(), Error> {
-            E::report_application_message::<Key>(
-                message.validate_write(MAX_ERROR_MESSAGE_SIZE as u32)?,
-            )?;
+            E::report_application_message(message.validate_write(MAX_ERROR_MESSAGE_SIZE as u32)?)?;
             Ok(())
         }
 
         fn raise_application_error(message: &[ApexByte]) -> Result<(), Error> {
-            E::raise_application_error::<Key>(
+            E::raise_application_error(
                 ErrorCode::ApplicationError,
                 message.validate_write(MAX_ERROR_MESSAGE_SIZE as u32)?,
             )?;
@@ -169,7 +163,7 @@ pub mod abstraction {
 
     impl<E: ApexErrorP1> ApexErrorP1Ext for E {
         fn error_status() -> Result<ErrorStatus, Error> {
-            Ok(E::get_error_status::<Key>()?)
+            Ok(E::get_error_status()?)
         }
     }
 
@@ -183,7 +177,7 @@ pub mod abstraction {
             entry_point: SystemAddress,
             stack_size: StackSize,
         ) -> Result<(), Error> {
-            E::create_error_handler::<Key>(entry_point, stack_size)?;
+            E::create_error_handler(entry_point, stack_size)?;
             Ok(())
         }
 
@@ -194,7 +188,7 @@ pub mod abstraction {
             concurrency_control: ErrorHandlerConcurrencyControl,
             processor_core_id: ProcessorCoreId,
         ) -> Result<(), Error> {
-            E::configure_error_handler::<Key>(concurrency_control, processor_core_id)?;
+            E::configure_error_handler(concurrency_control, processor_core_id)?;
             Ok(())
         }
     }

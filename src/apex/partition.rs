@@ -1,7 +1,8 @@
 /// bindings for ARINC653P1-5 3.2.2 partition
 pub mod basic {
-    use crate::bindings::*;
-    use crate::Locked;
+    use crate::apex::process::basic::*;
+    use crate::apex::time::basic::*;
+    use crate::apex::types::basic::*;
 
     /// According to ARINC 653P1-5 this may either be 32 or 64 bits.
     /// Internally we will use 64-bit by default.
@@ -77,12 +78,10 @@ pub mod basic {
     pub trait ApexPartitionP4 {
         // As stated in ARINC653P1-5 3.2.2.1, this never fails
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_partition_status<L: Locked>() -> ApexPartitionStatus;
+        fn get_partition_status() -> ApexPartitionStatus;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn set_partition_mode<L: Locked>(
-            operating_mode: OperatingMode,
-        ) -> Result<(), ErrorReturnCode>;
+        fn set_partition_mode(operating_mode: OperatingMode) -> Result<(), ErrorReturnCode>;
     }
 }
 
@@ -91,10 +90,9 @@ pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;
 
+    use super::basic::{ApexPartitionP4, ApexPartitionStatus};
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexPartitionP4, NumCores, OperatingMode, PartitionId, StartCondition};
-    use crate::bindings::*;
-    use crate::hidden::Key;
+    pub use super::basic::{NumCores, OperatingMode, PartitionId, StartCondition};
     use crate::prelude::*;
 
     #[derive(Debug, Clone, PartialEq, Eq)]
@@ -151,11 +149,11 @@ pub mod abstraction {
         A: ApexPartitionP4,
     {
         fn get_status() -> PartitionStatus {
-            A::get_partition_status::<Key>().into()
+            A::get_partition_status().into()
         }
 
         fn set_mode(mode: OperatingMode) -> Result<(), Error> {
-            Ok(A::set_partition_mode::<Key>(mode)?)
+            Ok(A::set_partition_mode(mode)?)
         }
 
         fn run(self) -> ! {
@@ -173,7 +171,7 @@ pub mod abstraction {
 
             // As stated in ARINC653P1-5 3.2.2.2, this can not fail,
             // because we are either in COLD_START or WARM_START
-            A::set_partition_mode::<Key>(OperatingMode::Normal).unwrap();
+            A::set_partition_mode(OperatingMode::Normal).unwrap();
 
             #[allow(clippy::empty_loop)]
             loop {

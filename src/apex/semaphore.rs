@@ -1,7 +1,7 @@
 /// bindings for ARINC653P1-5 3.7.2.3 semaphore
 pub mod basic {
-    use crate::bindings::*;
-    use crate::Locked;
+    use crate::apex::time::basic::*;
+    use crate::apex::types::basic::*;
 
     pub type SemaphoreName = ApexName;
 
@@ -57,7 +57,7 @@ pub mod basic {
     pub trait ApexSemaphoreP1 {
         // Only during Warm/Cold-Start
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn create_semaphore<L: Locked>(
+        fn create_semaphore(
             semaphore_name: SemaphoreName,
             current_value: SemaphoreValue,
             maximum_value: SemaphoreValue,
@@ -65,21 +65,19 @@ pub mod basic {
         ) -> Result<SemaphoreId, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn wait_semaphore<L: Locked>(
+        fn wait_semaphore(
             semaphore_id: SemaphoreId,
             time_out: ApexSystemTime,
         ) -> Result<(), ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn signal_semaphore<L: Locked>(semaphore_id: SemaphoreId) -> Result<(), ErrorReturnCode>;
+        fn signal_semaphore(semaphore_id: SemaphoreId) -> Result<(), ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_semaphore_id<L: Locked>(
-            semaphore_name: SemaphoreName,
-        ) -> Result<SemaphoreId, ErrorReturnCode>;
+        fn get_semaphore_id(semaphore_name: SemaphoreName) -> Result<SemaphoreId, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_semaphore_status<L: Locked>(
+        fn get_semaphore_status(
             semaphore_id: SemaphoreId,
         ) -> Result<SemaphoreStatus, ErrorReturnCode>;
     }
@@ -90,10 +88,9 @@ pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;
 
+    use super::basic::ApexSemaphoreP1;
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexSemaphoreP1, SemaphoreId, SemaphoreStatus, SemaphoreValue};
-    use crate::bindings::*;
-    use crate::hidden::Key;
+    pub use super::basic::{SemaphoreId, SemaphoreStatus, SemaphoreValue};
     use crate::prelude::*;
 
     #[derive(Debug)]
@@ -119,12 +116,12 @@ pub mod abstraction {
 
     impl<S: ApexSemaphoreP1> ApexSemaphoreP1Ext for S {
         fn get_semaphore(name: Name) -> Result<Semaphore<S>, Error> {
-            let id = S::get_semaphore_id::<Key>(name.into())?;
+            let id = S::get_semaphore_id(name.into())?;
             // According to ARINC653P1-5 3.7.2.3.5  this can only fail if the semaphore_id
             //  does not exist in the current partition.
             // But since we retrieve the semaphore_id directly from the hypervisor
             //  there is no possible way for it not existing
-            let status = S::get_semaphore_status::<Key>(id).unwrap();
+            let status = S::get_semaphore_status(id).unwrap();
 
             Ok(Semaphore {
                 _b: Default::default(),
@@ -148,12 +145,12 @@ pub mod abstraction {
         }
 
         pub fn wait(&self, timeout: SystemTime) -> Result<(), Error> {
-            S::wait_semaphore::<Key>(self.id, timeout.into())?;
+            S::wait_semaphore(self.id, timeout.into())?;
             Ok(())
         }
 
         pub fn signal(&self) -> Result<(), Error> {
-            S::signal_semaphore::<Key>(self.id)?;
+            S::signal_semaphore(self.id)?;
             Ok(())
         }
 
@@ -166,7 +163,7 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the semaphore_id directly from the hypervisor
             //  there is no possible way for it not existing
-            S::get_semaphore_status::<Key>(self.id).unwrap()
+            S::get_semaphore_status(self.id).unwrap()
         }
     }
 
@@ -178,7 +175,7 @@ pub mod abstraction {
             maximum: SemaphoreValue,
             qd: QueuingDiscipline,
         ) -> Result<Semaphore<S>, Error> {
-            let id = S::create_semaphore::<Key>(name.into(), current, maximum, qd)?;
+            let id = S::create_semaphore(name.into(), current, maximum, qd)?;
             Ok(Semaphore {
                 _b: Default::default(),
                 id,

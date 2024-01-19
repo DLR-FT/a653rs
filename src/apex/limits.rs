@@ -1,4 +1,4 @@
-use crate::bindings::*;
+use crate::apex::types::basic::*;
 
 /// Hypervisor dependent limits
 pub trait ApexLimits {
