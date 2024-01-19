@@ -23,7 +23,6 @@ pub(crate) mod basic {
         /// - [ErrorReturnCode::NoAction]: a blackboard with given `blackboard_name` already exists
         /// - [ErrorReturnCode::InvalidParam]: `max_message_size` is zero
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_blackboard(
             blackboard_name: BlackboardName,
             max_message_size: MessageSize,
@@ -35,7 +34,6 @@ pub(crate) mod basic {
         /// - [ErrorReturnCode::InvalidParam]: blackboard with `blackboard_id` does not exist
         /// - [ErrorReturnCode::InvalidParam]: the `message` is longer than the `max_message_size` specified for this blackboard
         /// - [ErrorReturnCode::InvalidParam]: `message` length is zero
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn display_blackboard(
             blackboard_id: BlackboardId,
             message: &[ApexByte],
@@ -54,7 +52,6 @@ pub(crate) mod basic {
         /// # Safety
         ///
         /// This function is safe, as long as the `message` can hold whatever is read
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         unsafe fn read_blackboard(
             blackboard_id: BlackboardId,
             time_out: ApexSystemTime,
@@ -65,14 +62,12 @@ pub(crate) mod basic {
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: blackboard with `blackboard_id` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn clear_blackboard(blackboard_id: BlackboardId) -> Result<(), ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.2.5
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: blackboard with `blackboard_name` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_blackboard_id(
             blackboard_name: BlackboardName,
         ) -> Result<BlackboardId, ErrorReturnCode>;
@@ -81,7 +76,6 @@ pub(crate) mod basic {
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: blackboard with `blackboard_id` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_blackboard_status(
             blackboard_id: BlackboardId,
         ) -> Result<BlackboardStatus, ErrorReturnCode>;

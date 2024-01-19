@@ -21,8 +21,7 @@ categories = [
 repository = "https://github.com/DLR-FT/a653rs/"
 
 [features]
-default = ["strum", "serde", "full_doc"]
-full_doc = []
+default = ["strum", "serde"]
 macros = [ "dep:a653rs_macros" ]
 serde = ["dep:serde"]
 strum = ["dep:strum"]

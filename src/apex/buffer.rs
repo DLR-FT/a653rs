@@ -24,7 +24,6 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidParam]: `max_message_size` is zero
         /// - [ErrorReturnCode::InvalidParam]: `max_nb_message` is too large
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn create_buffer(
             buffer_name: BufferName,
             max_message_size: MessageSize,
@@ -41,7 +40,6 @@ pub mod basic {
         /// - [ErrorReturnCode::InvalidMode]: current process is error handler AND `time_out` is not instant.
         /// - [ErrorReturnCode::NotAvailable]: there is no place in the buffer
         /// - [ErrorReturnCode::TimedOut]: `time_out` elapsed
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn send_buffer(
             buffer_id: BufferId,
             message: &[ApexByte],
@@ -61,7 +59,6 @@ pub mod basic {
         /// # Safety
         ///
         /// This function is safe, as long as the `message` can hold whatever is received
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         unsafe fn receive_buffer(
             buffer_id: BufferId,
             time_out: ApexSystemTime,
@@ -72,14 +69,12 @@ pub mod basic {
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: buffer with `buffer_name` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_buffer_id(buffer_name: BufferName) -> Result<BufferId, ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.1.5
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: buffer with `buffer_id` does not exist
-        #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
         fn get_buffer_status(buffer_id: BufferId) -> Result<BufferStatus, ErrorReturnCode>;
     }
 
