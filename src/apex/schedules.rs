@@ -1,6 +1,7 @@
 /// bindings for ARINC653P2-4 3.4 schedules
 pub mod basic {
-    use crate::bindings::*;
+    use crate::apex::time::basic::*;
+    use crate::apex::types::basic::*;
 
     pub type ScheduleName = ApexName;
 
@@ -11,11 +12,11 @@ pub mod basic {
 
     pub trait ApexScheduleP2 {
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn set_module_schedule<L: Locked>(schedule_id: ScheduleId) -> Result<(), ErrorReturnCode>;
+        fn set_module_schedule(schedule_id: ScheduleId) -> Result<(), ErrorReturnCode>;
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_module_schedule_status<L: Locked>() -> Result<ApexScheduleStatus, ErrorReturnCode>;
+        fn get_module_schedule_status() -> Result<ApexScheduleStatus, ErrorReturnCode>;
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_module_schedule_id<L: Locked>(
+        fn get_module_schedule_id(
             schedule_name: ScheduleName,
         ) -> Result<ScheduleId, ErrorReturnCode>;
     }
@@ -30,8 +31,9 @@ pub mod basic {
 
 /// abstractions for ARINC653P2-4 3.4 schedules
 pub mod abstraction {
-    use super::basic::{ApexScheduleP2, ApexScheduleStatus, ScheduleId, ScheduleName};
-    use crate::hidden::Key;
+    use super::basic::{ApexScheduleP2, ApexScheduleStatus};
+    // Reexport important basic-types for downstream-user
+    pub use super::basic::{ScheduleId, ScheduleName};
     use crate::prelude::*;
 
     #[derive(Debug, Clone, PartialEq, Eq)]
@@ -59,16 +61,16 @@ pub mod abstraction {
 
     impl<T: ApexScheduleP2> ApexScheduleP2Ext for T {
         fn set_module_schedule(schedule_id: ScheduleId) -> Result<(), Error> {
-            T::set_module_schedule::<Key>(schedule_id)?;
+            T::set_module_schedule(schedule_id)?;
             Ok(())
         }
 
         fn get_module_schedule_status() -> Result<ScheduleStatus, Error> {
-            Ok(T::get_module_schedule_status::<Key>().map(ScheduleStatus::from)?)
+            Ok(T::get_module_schedule_status().map(ScheduleStatus::from)?)
         }
 
         fn get_module_schedule_id(schedule_name: ScheduleName) -> Result<ScheduleId, Error> {
-            Ok(T::get_module_schedule_id::<Key>(schedule_name)?)
+            Ok(T::get_module_schedule_id(schedule_name)?)
         }
     }
 }

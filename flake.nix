@@ -99,7 +99,7 @@
                 command = ''
                   cd $PRJ_ROOT
                   cargo doc --all-features --workspace $@
-                  cargo doc --no-default-features --workspace $@
+                  RUSTDOCFLAGS="-A rustdoc::private_intra_doc_links " cargo doc --no-default-features --workspace $@
                 '';
                 help =
                   "Verify that the documentation builds without problems";

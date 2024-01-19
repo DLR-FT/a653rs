@@ -1,7 +1,7 @@
 /// bindings for ARINC653P1-5 3.6.2.1 sampling
 pub mod basic {
-    use crate::bindings::*;
-    use crate::Locked;
+    use crate::apex::time::basic::*;
+    use crate::apex::types::basic::*;
 
     pub type SamplingPortName = ApexName;
 
@@ -33,7 +33,7 @@ pub mod basic {
     pub trait ApexSamplingPortP4 {
         // Only during Warm/Cold-Start
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn create_sampling_port<L: Locked>(
+        fn create_sampling_port(
             sampling_port_name: SamplingPortName,
             max_message_size: MessageSize,
             port_direction: PortDirection,
@@ -41,7 +41,7 @@ pub mod basic {
         ) -> Result<SamplingPortId, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn write_sampling_message<L: Locked>(
+        fn write_sampling_message(
             sampling_port_id: SamplingPortId,
             message: &[ApexByte],
         ) -> Result<(), ErrorReturnCode>;
@@ -50,7 +50,7 @@ pub mod basic {
         ///
         /// This function is safe, as long as the buffer can hold whatever is received
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        unsafe fn read_sampling_message<L: Locked>(
+        unsafe fn read_sampling_message(
             sampling_port_id: SamplingPortId,
             message: &mut [ApexByte],
         ) -> Result<(Validity, MessageSize), ErrorReturnCode>;
@@ -58,12 +58,12 @@ pub mod basic {
 
     pub trait ApexSamplingPortP1: ApexSamplingPortP4 {
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_sampling_port_id<L: Locked>(
+        fn get_sampling_port_id(
             sampling_port_name: SamplingPortName,
         ) -> Result<SamplingPortId, ErrorReturnCode>;
 
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_sampling_port_status<L: Locked>(
+        fn get_sampling_port_status(
             sampling_port_id: SamplingPortId,
         ) -> Result<ApexSamplingPortStatus, ErrorReturnCode>;
     }
@@ -75,10 +75,10 @@ pub mod abstraction {
     use core::sync::atomic::AtomicPtr;
     use core::time::Duration;
 
+    use super::basic::{ApexSamplingPortP1, ApexSamplingPortP4, ApexSamplingPortStatus};
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexSamplingPortP1, ApexSamplingPortP4, SamplingPortId, Validity};
-    use crate::bindings::*;
-    use crate::hidden::Key;
+    pub use super::basic::{SamplingPortId, Validity};
+    use crate::apex::types::basic::PortDirection;
     use crate::prelude::*;
 
     #[derive(Debug, Clone, PartialEq, Eq)]
@@ -169,7 +169,7 @@ pub mod abstraction {
             id: SamplingPortId,
             buffer: &[ApexByte],
         ) -> Result<(), Error> {
-            S::write_sampling_message::<Key>(id, buffer)?;
+            S::write_sampling_message(id, buffer)?;
             Ok(())
         }
 
@@ -177,7 +177,7 @@ pub mod abstraction {
             id: SamplingPortId,
             buffer: &mut [ApexByte],
         ) -> Result<(Validity, &[ApexByte]), Error> {
-            let (val, len) = S::read_sampling_message::<Key>(id, buffer)?;
+            let (val, len) = S::read_sampling_message(id, buffer)?;
             Ok((val, &buffer[..(len as usize)]))
         }
     }
@@ -188,7 +188,7 @@ pub mod abstraction {
         fn get_sampling_port_source<const MSG_SIZE: MessageSize>(
             name: Name,
         ) -> Result<SamplingPortSource<MSG_SIZE, Self>, Error> {
-            let id = S::get_sampling_port_id::<Key>(name.into())?;
+            let id = S::get_sampling_port_id(name.into())?;
             // According to ARINC653P1-5 3.6.2.1.5 this can only fail if the sampling_port_id
             //  does not exist in the current partition.
             // But since we retrieve the sampling_port_id directly from the hypervisor
@@ -198,7 +198,7 @@ pub mod abstraction {
                 max_message_size,
                 port_direction,
                 ..
-            } = S::get_sampling_port_status::<Key>(id).unwrap().into();
+            } = S::get_sampling_port_status(id).unwrap().into();
 
             if max_message_size != MSG_SIZE {
                 return Err(Error::InvalidConfig);
@@ -219,7 +219,7 @@ pub mod abstraction {
         fn get_sampling_port_destination<const MSG_SIZE: MessageSize>(
             name: Name,
         ) -> Result<SamplingPortDestination<MSG_SIZE, Self>, Error> {
-            let id = S::get_sampling_port_id::<Key>(name.into())?;
+            let id = S::get_sampling_port_id(name.into())?;
             // According to ARINC653P1-5 3.6.2.1.5 this can only fail if the sampling_port_id
             //  does not exist in the current partition.
             // But since we retrieve the sampling_port_id directly from the hypervisor
@@ -229,7 +229,7 @@ pub mod abstraction {
                 max_message_size,
                 port_direction,
                 ..
-            } = S::get_sampling_port_status::<Key>(id)?.into();
+            } = S::get_sampling_port_status(id)?.into();
 
             if max_message_size != MSG_SIZE {
                 return Err(Error::InvalidConfig);
@@ -274,7 +274,7 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the sampling_port_id directly from the hypervisor
             //  there is no possible way for it to not exist
-            S::get_sampling_port_status::<Key>(self.id).unwrap().into()
+            S::get_sampling_port_status(self.id).unwrap().into()
         }
     }
 
@@ -310,7 +310,7 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the sampling_port_id directly from the hypervisor
             //  there is no possible way for it not existing
-            S::get_sampling_port_status::<Key>(self.id).unwrap().into()
+            S::get_sampling_port_status(self.id).unwrap().into()
         }
     }
 
@@ -319,7 +319,7 @@ pub mod abstraction {
             &mut self,
             name: Name,
         ) -> Result<SamplingPortSource<MSG_SIZE, S>, Error> {
-            let id = S::create_sampling_port::<Key>(
+            let id = S::create_sampling_port(
                 name.into(),
                 MSG_SIZE,
                 PortDirection::Source,
@@ -338,7 +338,7 @@ pub mod abstraction {
             name: Name,
             refresh: Duration,
         ) -> Result<SamplingPortDestination<MSG_SIZE, S>, Error> {
-            let id = S::create_sampling_port::<Key>(
+            let id = S::create_sampling_port(
                 name.into(),
                 MSG_SIZE,
                 PortDirection::Destination,

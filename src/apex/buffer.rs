@@ -1,7 +1,7 @@
 /// bindings for ARINC653P1-5 3.7.2.1 buffer
 pub mod basic {
-    use crate::bindings::*;
-    use crate::Locked;
+    use crate::apex::time::basic::*;
+    use crate::apex::types::basic::*;
 
     /// ARINC653P1-5 3.7.1
     pub type BufferName = ApexName;
@@ -19,13 +19,13 @@ pub mod basic {
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: not enough memory is available
-        /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BUFFERS](crate::bindings::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BUFFERS) was reached
+        /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BUFFERS](crate::apex::limits::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BUFFERS) was reached
         /// - [ErrorReturnCode::NoAction]: a buffer with given `buffer_name` already exists
         /// - [ErrorReturnCode::InvalidParam]: `max_message_size` is zero
         /// - [ErrorReturnCode::InvalidParam]: `max_nb_message` is too large
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn create_buffer<L: Locked>(
+        fn create_buffer(
             buffer_name: BufferName,
             max_message_size: MessageSize,
             max_nb_message: MessageRange,
@@ -42,7 +42,7 @@ pub mod basic {
         /// - [ErrorReturnCode::NotAvailable]: there is no place in the buffer
         /// - [ErrorReturnCode::TimedOut]: `time_out` elapsed
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn send_buffer<L: Locked>(
+        fn send_buffer(
             buffer_id: BufferId,
             message: &[ApexByte],
             time_out: ApexSystemTime,
@@ -62,7 +62,7 @@ pub mod basic {
         ///
         /// This function is safe, as long as the `message` can hold whatever is received
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        unsafe fn receive_buffer<L: Locked>(
+        unsafe fn receive_buffer(
             buffer_id: BufferId,
             time_out: ApexSystemTime,
             message: &mut [ApexByte],
@@ -73,16 +73,14 @@ pub mod basic {
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: buffer with `buffer_name` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_buffer_id<L: Locked>(buffer_name: BufferName) -> Result<BufferId, ErrorReturnCode>;
+        fn get_buffer_id(buffer_name: BufferName) -> Result<BufferId, ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.1.5
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: buffer with `buffer_id` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_buffer_status<L: Locked>(
-            buffer_id: BufferId,
-        ) -> Result<BufferStatus, ErrorReturnCode>;
+        fn get_buffer_status(buffer_id: BufferId) -> Result<BufferStatus, ErrorReturnCode>;
     }
 
     /// ARINC653P1-5 3.7.1
@@ -102,10 +100,9 @@ pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;
 
+    use super::basic::ApexBufferP1;
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexBufferP1, BufferId, BufferStatus};
-    use crate::bindings::*;
-    use crate::hidden::Key;
+    pub use super::basic::{BufferId, BufferStatus};
     use crate::prelude::*;
 
     /// Buffer abstraction struct
@@ -137,12 +134,12 @@ pub mod abstraction {
 
     impl<B: ApexBufferP1> ApexBufferP1Ext for B {
         fn get_buffer(name: Name) -> Result<Buffer<B>, Error> {
-            let id = B::get_buffer_id::<Key>(name.into())?;
+            let id = B::get_buffer_id(name.into())?;
             // According to ARINC653P1-5 3.7.2.1.5 this can only fail if the buffer_id
             //  does not exist in the current partition.
             // But since we retrieve the buffer_id directly from the hypervisor
             //  there is no possible way for it not existing
-            let status = B::get_buffer_status::<Key>(id).unwrap();
+            let status = B::get_buffer_status(id).unwrap();
 
             Ok(Buffer {
                 _b: Default::default(),
@@ -181,7 +178,7 @@ pub mod abstraction {
         /// - [Error::WriteError]: `buffer` length is zero
         pub fn send(&self, buffer: &mut [ApexByte], timeout: SystemTime) -> Result<(), Error> {
             buffer.validate_write(self.max_size)?;
-            B::send_buffer::<Key>(self.id, buffer, timeout.into())?;
+            B::send_buffer(self.id, buffer, timeout.into())?;
             Ok(())
         }
 
@@ -220,7 +217,7 @@ pub mod abstraction {
             timeout: SystemTime,
             buffer: &'a mut [ApexByte],
         ) -> Result<&'a [ApexByte], Error> {
-            let len = B::receive_buffer::<Key>(self.id, timeout.into(), buffer)? as usize;
+            let len = B::receive_buffer(self.id, timeout.into(), buffer)? as usize;
             Ok(&buffer[..len])
         }
 
@@ -231,14 +228,14 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the buffer_id directly from the hypervisor
             //  there is no possible way for it not existing
-            B::get_buffer_status::<Key>(self.id).unwrap()
+            B::get_buffer_status(self.id).unwrap()
         }
     }
 
     impl<B: ApexBufferP1> StartContext<B> {
         /// # Errors
         /// - [Error::InvalidConfig]: not enough memory is available
-        /// - [Error::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BUFFERS](crate::bindings::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BUFFERS) was reached
+        /// - [Error::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BUFFERS](crate::apex::limits::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_BUFFERS) was reached
         /// - [Error::NoAction]: a buffer with given `name` already exists
         /// - [Error::InvalidParam]: `size` is zero
         /// - [Error::InvalidParam]: `range` is too large
@@ -249,7 +246,7 @@ pub mod abstraction {
             range: MessageRange,
             qd: QueuingDiscipline,
         ) -> Result<Buffer<B>, Error> {
-            let id = B::create_buffer::<Key>(name.into(), size, range, qd)?;
+            let id = B::create_buffer(name.into(), size, range, qd)?;
             Ok(Buffer {
                 _b: Default::default(),
                 id,

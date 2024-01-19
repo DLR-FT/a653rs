@@ -25,4 +25,4 @@ convert_case = "0.6"
 humantime = "2.1"
 
 [dev-dependencies]
-a653rs = { path = ".." }
+a653rs = { path = "..", features = ["bindings"]}

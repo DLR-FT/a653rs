@@ -1,7 +1,7 @@
 /// bindings for ARINC653P1-5 3.7.2.4 events
 pub mod basic {
-    use crate::bindings::*;
-    use crate::Locked;
+    use crate::apex::time::basic::*;
+    use crate::apex::types::basic::*;
 
     /// ARINC653P1-5 3.7.1
     pub type EventName = ApexName;
@@ -39,25 +39,25 @@ pub mod basic {
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: not enough memory is available
-        /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS](crate::bindings::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS) was reached
+        /// - [ErrorReturnCode::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS](crate::apex::limits::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS) was reached
         /// - [ErrorReturnCode::NoAction]: an event with given `event_name` already exists
         /// - [ErrorReturnCode::InvalidMode]: our current operating mode is [OperatingMode::Normal](crate::prelude::OperatingMode::Normal)
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn create_event<L: Locked>(event_name: EventName) -> Result<EventId, ErrorReturnCode>;
+        fn create_event(event_name: EventName) -> Result<EventId, ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.2 changes events state to [EventState::Up]
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: event with `event_id` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn set_event<L: Locked>(event_id: EventId) -> Result<(), ErrorReturnCode>;
+        fn set_event(event_id: EventId) -> Result<(), ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.3 changes events state to [EventState::Down]
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: event with `event_id` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn reset_event<L: Locked>(event_id: EventId) -> Result<(), ErrorReturnCode>;
+        fn reset_event(event_id: EventId) -> Result<(), ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.4
         ///
@@ -69,24 +69,21 @@ pub mod basic {
         /// - [ErrorReturnCode::NotAvailable]: `time_out` is instant AND event is [EventState::Down]
         /// - [ErrorReturnCode::TimedOut]: `time_out` elapsed
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn wait_event<L: Locked>(
-            event_id: EventId,
-            time_out: ApexSystemTime,
-        ) -> Result<(), ErrorReturnCode>;
+        fn wait_event(event_id: EventId, time_out: ApexSystemTime) -> Result<(), ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.5
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: event with `event_name` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_event_id<L: Locked>(event_name: EventName) -> Result<EventId, ErrorReturnCode>;
+        fn get_event_id(event_name: EventName) -> Result<EventId, ErrorReturnCode>;
 
         /// APEX653P1-5 3.7.2.4.6
         ///
         /// # Errors
         /// - [ErrorReturnCode::InvalidParam]: event with `event_id` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_event_status<L: Locked>(event_id: EventId) -> Result<EventStatus, ErrorReturnCode>;
+        fn get_event_status(event_id: EventId) -> Result<EventStatus, ErrorReturnCode>;
     }
 }
 
@@ -95,9 +92,9 @@ pub mod abstraction {
     use core::marker::PhantomData;
     use core::sync::atomic::AtomicPtr;
 
+    use super::basic::ApexEventP1;
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexEventP1, EventId, EventState, EventStatus};
-    use crate::hidden::Key;
+    pub use super::basic::{EventId, EventState, EventStatus};
     use crate::prelude::*;
 
     /// Event abstraction struct
@@ -125,7 +122,7 @@ pub mod abstraction {
 
     impl<E: ApexEventP1> ApexEventP1Ext for E {
         fn get_event(name: Name) -> Result<Event<E>, Error> {
-            let id = E::get_event_id::<Key>(name.into())?;
+            let id = E::get_event_id(name.into())?;
 
             Ok(Event {
                 _b: Default::default(),
@@ -154,7 +151,7 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the event_id directly from the hypervisor
             //  there is no possible way for it not existing
-            E::set_event::<Key>(self.id).unwrap();
+            E::set_event(self.id).unwrap();
         }
 
         /// Change to [EventState::Down]
@@ -166,7 +163,7 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the event_id directly from the hypervisor
             //  there is no possible way for it not existing
-            E::reset_event::<Key>(self.id).unwrap();
+            E::reset_event(self.id).unwrap();
         }
 
         /// wait for this event to occur
@@ -178,7 +175,7 @@ pub mod abstraction {
         /// - [Error::NotAvailable]: `timeout` is instant AND event is [EventState::Down]
         /// - [Error::TimedOut]: `timeout` elapsed
         pub fn wait(&self, timeout: SystemTime) -> Result<(), Error> {
-            E::wait_event::<Key>(self.id, timeout.into())?;
+            E::wait_event(self.id, timeout.into())?;
             Ok(())
         }
 
@@ -191,17 +188,17 @@ pub mod abstraction {
             //  does not exist in the current partition.
             // But since we retrieve the event_id directly from the hypervisor
             //  there is no possible way for it not existing
-            E::get_event_status::<Key>(self.id).unwrap()
+            E::get_event_status(self.id).unwrap()
         }
     }
 
     impl<E: ApexEventP1> StartContext<E> {
         /// # Errors
         /// - [Error::InvalidConfig]: not enough memory is available
-        /// - [Error::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS](crate::bindings::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS) was reached
+        /// - [Error::InvalidConfig]: [ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS](crate::apex::limits::ApexLimits::SYSTEM_LIMIT_NUMBER_OF_EVENTS) was reached
         /// - [Error::NoAction]: an event with given `name` already exists
         pub fn create_event(&mut self, name: Name) -> Result<Event<E>, Error> {
-            let id = E::create_event::<Key>(name.into())?;
+            let id = E::create_event(name.into())?;
             Ok(Event {
                 _b: Default::default(),
                 id,

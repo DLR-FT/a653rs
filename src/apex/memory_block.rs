@@ -1,6 +1,6 @@
 /// bindings for ARINC653P2-4 3.9 memory blocks
 pub mod basic {
-    use crate::bindings::*;
+    use crate::apex::types::basic::*;
 
     /// ARINC653P2-4 3.9.1
     pub type MemoryBlockName = ApexName;
@@ -14,7 +14,7 @@ pub mod basic {
         /// # Errors
         /// - [ErrorReturnCode::InvalidConfig]: memory block with `memory_block_name` does not exist
         #[cfg_attr(not(feature = "full_doc"), doc(hidden))]
-        fn get_memory_block_status<L: Locked>(
+        fn get_memory_block_status(
             memory_block_name: MemoryBlockName,
         ) -> Result<ApexMemoryBlockStatus, ErrorReturnCode>;
     }
@@ -45,10 +45,9 @@ pub mod abstraction {
     use core::marker::PhantomData;
     use core::slice::from_raw_parts_mut;
 
-    use super::basic::ApexMemoryBlockStatus;
+    use super::basic::{ApexMemoryBlockP2, ApexMemoryBlockStatus};
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{ApexMemoryBlockP2, MemoryBlockMode, MemoryBlockName, MemoryBlockSize};
-    use crate::hidden::Key;
+    pub use super::basic::{MemoryBlockMode, MemoryBlockName, MemoryBlockSize};
     use crate::prelude::*;
 
     // #[derive(Debug)]
@@ -85,7 +84,7 @@ pub mod abstraction {
 
     impl<M: ApexMemoryBlockP2> ApexMemoryBlockP2Ext for M {
         fn get_memory_block(name: Name) -> Result<MemoryBlock<M>, Error> {
-            Ok(M::get_memory_block_status::<Key>(name.into())?.into())
+            Ok(M::get_memory_block_status(name.into())?.into())
         }
     }
 
