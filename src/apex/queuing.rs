@@ -74,13 +74,13 @@ pub mod abstraction {
     pub struct QueuingPortSender<
         const MSG_SIZE: MessageSize,
         const NB_MSGS: MessageRange,
-        Q: ApexQueuingPortP4,
+        Q: ApexQueuingPortP4Ext,
     > {
         _b: PhantomData<AtomicPtr<Q>>,
         id: QueuingPortId,
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4> Clone
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext> Clone
         for QueuingPortSender<MSG_SIZE, NB_MSGS, S>
     {
         fn clone(&self) -> Self {
@@ -95,13 +95,13 @@ pub mod abstraction {
     pub struct QueuingPortReceiver<
         const MSG_SIZE: MessageSize,
         const NB_MSGS: MessageRange,
-        Q: ApexQueuingPortP4,
+        Q: ApexQueuingPortP4Ext,
     > {
         _b: PhantomData<AtomicPtr<Q>>,
         id: QueuingPortId,
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4> Clone
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext> Clone
         for QueuingPortReceiver<MSG_SIZE, NB_MSGS, S>
     {
         fn clone(&self) -> Self {
@@ -239,7 +239,7 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
         QueuingPortSender<MSG_SIZE, NB_MSGS, Q>
     {
         pub fn send(&self, buffer: &[ApexByte], timeout: SystemTime) -> Result<(), Error> {
@@ -268,7 +268,7 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP1>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP1Ext>
         QueuingPortSender<MSG_SIZE, NB_MSGS, Q>
     {
         pub fn from_name(name: Name) -> Result<QueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
@@ -276,7 +276,7 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
         QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>
     {
         pub fn receive<'a>(
@@ -318,7 +318,7 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP1>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP1Ext>
         QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>
     {
         pub fn from_name(name: Name) -> Result<QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
@@ -326,7 +326,7 @@ pub mod abstraction {
         }
     }
 
-    impl<Q: ApexQueuingPortP4> StartContext<Q> {
+    impl<Q: ApexQueuingPortP4Ext> StartContext<Q> {
         pub fn create_queuing_port_sender<
             const MSG_SIZE: MessageSize,
             const NB_MSGS: MessageRange,

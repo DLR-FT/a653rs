@@ -97,12 +97,14 @@ pub mod abstraction {
     }
 
     #[derive(Debug)]
-    pub struct SamplingPortSource<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> {
+    pub struct SamplingPortSource<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> {
         _b: PhantomData<AtomicPtr<S>>,
         id: SamplingPortId,
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> Clone for SamplingPortSource<MSG_SIZE, S> {
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> Clone
+        for SamplingPortSource<MSG_SIZE, S>
+    {
         fn clone(&self) -> Self {
             Self {
                 _b: self._b,
@@ -112,13 +114,13 @@ pub mod abstraction {
     }
 
     #[derive(Debug)]
-    pub struct SamplingPortDestination<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> {
+    pub struct SamplingPortDestination<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> {
         _b: PhantomData<AtomicPtr<S>>,
         id: SamplingPortId,
         refresh: Duration,
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> Clone
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> Clone
         for SamplingPortDestination<MSG_SIZE, S>
     {
         fn clone(&self) -> Self {
@@ -244,7 +246,7 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> SamplingPortSource<MSG_SIZE, S> {
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> SamplingPortSource<MSG_SIZE, S> {
         pub fn send(&self, buffer: &[ApexByte]) -> Result<(), Error> {
             buffer.validate_write(MSG_SIZE)?;
             S::sampling_port_send_unchecked(self.id, buffer)
@@ -259,7 +261,7 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP1> SamplingPortSource<MSG_SIZE, S> {
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP1Ext> SamplingPortSource<MSG_SIZE, S> {
         pub fn from_name(name: Name) -> Result<SamplingPortSource<MSG_SIZE, S>, Error> {
             S::get_sampling_port_source(name)
         }
@@ -273,7 +275,7 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4> SamplingPortDestination<MSG_SIZE, S> {
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> SamplingPortDestination<MSG_SIZE, S> {
         pub fn receive<'a>(
             &self,
             buffer: &'a mut [ApexByte],
@@ -295,7 +297,7 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP1> SamplingPortDestination<MSG_SIZE, S> {
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP1Ext> SamplingPortDestination<MSG_SIZE, S> {
         pub fn from_name(name: Name) -> Result<SamplingPortDestination<MSG_SIZE, S>, Error> {
             S::get_sampling_port_destination(name)
         }
@@ -309,7 +311,7 @@ pub mod abstraction {
         }
     }
 
-    impl<S: ApexSamplingPortP4> StartContext<S> {
+    impl<S: ApexSamplingPortP4Ext> StartContext<S> {
         pub fn create_sampling_port_source<const MSG_SIZE: MessageSize>(
             &mut self,
             name: Name,
