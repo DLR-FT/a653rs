@@ -1,6 +1,6 @@
 [package]
 name = "a653rs_macros"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 authors = ["Sven Friedrich <sven.friedrich@dlr.de>"]
 license = "MIT OR Apache-2.0"
