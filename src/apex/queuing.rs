@@ -10,6 +10,13 @@ pub mod basic {
     /// The implementing Hypervisor may cast this to 32-bit if needed
     pub type QueuingPortId = ApexLongInteger;
 
+    /// The queue overflowed on the sender side
+    pub type QueueOverflow = bool;
+
+    /// ARINC 653P1-5 3.6.2.2.3 states that [ErrorReturnCode::InvalidConfig] signals that the queue overflowed on the sender side
+    #[cfg_attr(not(feature = "bindings"), allow(dead_code))]
+    pub const QUEUE_OVERFLOW_ERROR: ErrorReturnCode = ErrorReturnCode::InvalidConfig;
+
     #[derive(Debug, Clone, PartialEq, Eq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct QueuingPortStatus {
@@ -43,7 +50,7 @@ pub mod basic {
             queuing_port_id: QueuingPortId,
             time_out: ApexSystemTime,
             message: &mut [ApexByte],
-        ) -> Result<MessageSize, ErrorReturnCode>;
+        ) -> Result<(MessageSize, QueueOverflow), ErrorReturnCode>;
 
         fn get_queuing_port_status(
             queuing_port_id: QueuingPortId,
@@ -66,7 +73,7 @@ pub mod abstraction {
 
     use super::basic::{ApexQueuingPortP1, ApexQueuingPortP4};
     // Reexport important basic-types for downstream-user
-    pub use super::basic::{QueuingPortId, QueuingPortStatus};
+    pub use super::basic::{QueueOverflow, QueuingPortId, QueuingPortStatus};
     use crate::apex::types::basic::PortDirection;
     use crate::prelude::*;
 
@@ -126,7 +133,7 @@ pub mod abstraction {
             id: QueuingPortId,
             timeout: SystemTime,
             buffer: &mut [ApexByte],
-        ) -> Result<&[ApexByte], Error>;
+        ) -> Result<(&[ApexByte], QueueOverflow), Error>;
     }
 
     pub trait ApexQueuingPortP1Ext: ApexQueuingPortP1 + Sized {
@@ -159,9 +166,9 @@ pub mod abstraction {
             id: QueuingPortId,
             timeout: SystemTime,
             buffer: &mut [ApexByte],
-        ) -> Result<&[ApexByte], Error> {
-            let len = Q::receive_queuing_message(id, timeout.into(), buffer)? as usize;
-            Ok(&buffer[..len])
+        ) -> Result<(&[ApexByte], QueueOverflow), Error> {
+            let (len, overflow) = Q::receive_queuing_message(id, timeout.into(), buffer)?;
+            Ok((&buffer[..(len as usize)], overflow))
         }
     }
 
@@ -283,7 +290,7 @@ pub mod abstraction {
             &self,
             buffer: &'a mut [ApexByte],
             timeout: SystemTime,
-        ) -> Result<&'a [ApexByte], Error> {
+        ) -> Result<(&'a [ApexByte], QueueOverflow), Error> {
             buffer.validate_read(MSG_SIZE)?;
             unsafe { Q::queueing_port_receive_unchecked(self.id, timeout, buffer) }
         }
