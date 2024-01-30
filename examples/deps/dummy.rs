@@ -43,7 +43,7 @@ impl ApexQueuingPortP4 for DummyHypervisor {
         _queuing_port_id: QueuingPortId,
         _time_out: ApexSystemTime,
         _message: &mut [ApexByte],
-    ) -> Result<MessageSize, ErrorReturnCode> {
+    ) -> Result<(MessageSize, QueueOverflow), ErrorReturnCode> {
         todo!()
     }
 
