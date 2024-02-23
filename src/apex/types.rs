@@ -135,9 +135,9 @@ pub mod abstraction {
         InvalidMode,
         /// time-out tied up with request has expired
         TimedOut,
-        /// buffer got zero length or is to long
+        /// buffer is too large
         WriteError,
-        /// buffer is to small
+        /// buffer is too small
         ReadError,
     }
 
@@ -219,12 +219,14 @@ pub mod abstraction {
         }
 
         fn validate_write(&self, size: MessageSize) -> Result<&Self, Error> {
+            // This is what the hypervisor would return, but we can detect the error early.
             if usize::try_from(size)
                 .map(|ss| self.len() > ss)
                 .unwrap_or(false)
-                || self.is_empty()
             {
-                return Err(Error::WriteError);
+                return Err(Error::InvalidConfig);
+            } else if self.is_empty() {
+                return Err(Error::InvalidParam);
             }
             Ok(self)
         }
