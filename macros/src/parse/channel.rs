@@ -162,14 +162,8 @@ impl Channel {
 
     pub fn typ(&self) -> Type {
         match self {
-            Channel::SamplingOut(_, s) => {
-                let size = s.msg_size.bytes() as u32;
-                parse_quote!(SamplingPortSource::< #size , Hypervisor>)
-            }
-            Channel::SamplingIn(_, s) => {
-                let size = s.msg_size.bytes() as u32;
-                parse_quote!(SamplingPortDestination::< #size , Hypervisor>)
-            }
+            Channel::SamplingOut(_, _) => parse_quote!(SamplingPortSource::<Hypervisor>),
+            Channel::SamplingIn(_, _) => parse_quote!(SamplingPortDestination::<Hypervisor>),
             Channel::QueuingOut(_, q) => {
                 let size = q.msg_size.bytes() as u32;
                 let count = q.msg_count as u32;
