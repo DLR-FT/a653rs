@@ -1,0 +1,22 @@
+[package]
+name = "a653rs-ffi"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sven Friedrich <sven.friedrich@dlr.de>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/DLR-FT/a653rs/"
+description = "C-FFI implementation macros for a653rs"
+
+[lib]
+proc-macro = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "2.0", features = [ "full" ] }
+cty = "0.2"
+
+[dev-dependencies]
+a653rs = { path = "..", features = ["bindings"] }

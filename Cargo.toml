@@ -36,7 +36,7 @@ a653rs_macros = { version = "0.4.1", path = "macros", optional = true }
 a653rs_macros = { version = "0.4.1", path = "macros" }
 
 [workspace]
-members = [ "macros" ]
+members = [ "ffi", "macros" ]
 
 [[example]]
 name = "partition"
