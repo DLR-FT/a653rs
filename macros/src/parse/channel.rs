@@ -164,16 +164,8 @@ impl Channel {
         match self {
             Channel::SamplingOut(_, _) => parse_quote!(SamplingPortSource::<Hypervisor>),
             Channel::SamplingIn(_, _) => parse_quote!(SamplingPortDestination::<Hypervisor>),
-            Channel::QueuingOut(_, q) => {
-                let size = q.msg_size.bytes() as u32;
-                let count = q.msg_count as u32;
-                parse_quote!(QueuingPortSender::< #size , #count , Hypervisor>)
-            }
-            Channel::QueuingIn(_, q) => {
-                let size = q.msg_size.bytes() as u32;
-                let count = q.msg_count as u32;
-                parse_quote!(QueuingPortReceiver::< #size , #count , Hypervisor>)
-            }
+            Channel::QueuingOut(_, _) => parse_quote!(QueuingPortSender::<Hypervisor>),
+            Channel::QueuingIn(_, _) => parse_quote!(QueuingPortReceiver::<Hypervisor>),
         }
     }
 

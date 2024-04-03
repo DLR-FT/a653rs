@@ -59,12 +59,16 @@ impl Channel {
                 parse_quote!(create_sampling_port_destination(NAME, #size, #dur))
             }
             Channel::QueuingOut(_, ch) => {
+                let size = ch.msg_size.bytes() as u32;
+                let count = ch.msg_count as u32;
                 let disc: Path = ch.discipline.into();
-                parse_quote!(create_queuing_port_sender(NAME, #disc))
+                parse_quote!(create_queuing_port_sender(NAME, #size, #count, #disc))
             }
             Channel::QueuingIn(_, ch) => {
+                let size = ch.msg_size.bytes() as u32;
+                let count = ch.msg_count as u32;
                 let disc: Path = ch.discipline.into();
-                parse_quote!(create_queuing_port_receiver(NAME, #disc))
+                parse_quote!(create_queuing_port_receiver(NAME, #size, #count, #disc))
             }
         }
     }
