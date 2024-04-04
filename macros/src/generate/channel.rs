@@ -48,13 +48,13 @@ impl Channel {
     pub fn gen_create_channel_call(&self) -> ExprCall {
         match self {
             Channel::SamplingOut(_, _) => {
-                parse_quote!(create_sampling_port_source(NAME))
+                parse_quote!(create_const_sampling_port_source(NAME))
             }
             Channel::SamplingIn(_, ch) => {
                 let dur: Duration = ch.refresh_period.into();
                 let dur = dur.as_nanos() as u64;
                 let dur: Expr = parse_quote!(core::time::Duration::from_nanos(#dur));
-                parse_quote!(create_sampling_port_destination(NAME, #dur))
+                parse_quote!(create_const_sampling_port_destination(NAME, #dur))
             }
             Channel::QueuingOut(_, ch) => {
                 let disc: Path = ch.discipline.into();

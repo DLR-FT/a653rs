@@ -97,13 +97,13 @@ pub mod abstraction {
     }
 
     #[derive(Debug)]
-    pub struct SamplingPortSource<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> {
+    pub struct ConstSamplingPortSource<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> {
         _b: PhantomData<AtomicPtr<S>>,
         id: SamplingPortId,
     }
 
     impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> Clone
-        for SamplingPortSource<MSG_SIZE, S>
+        for ConstSamplingPortSource<MSG_SIZE, S>
     {
         fn clone(&self) -> Self {
             Self {
@@ -114,14 +114,14 @@ pub mod abstraction {
     }
 
     #[derive(Debug)]
-    pub struct SamplingPortDestination<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> {
+    pub struct ConstSamplingPortDestination<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> {
         _b: PhantomData<AtomicPtr<S>>,
         id: SamplingPortId,
         refresh: Duration,
     }
 
     impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> Clone
-        for SamplingPortDestination<MSG_SIZE, S>
+        for ConstSamplingPortDestination<MSG_SIZE, S>
     {
         fn clone(&self) -> Self {
             Self {
@@ -150,15 +150,15 @@ pub mod abstraction {
     pub trait ApexSamplingPortP1Ext: ApexSamplingPortP1 + Sized {
         /// Returns Err(Error::InvalidConfig) if sampling port with name does not exists or
         /// if the message size of the found sampling port is different than MSG_SIZE
-        fn get_sampling_port_source<const MSG_SIZE: MessageSize>(
+        fn get_const_sampling_port_source<const MSG_SIZE: MessageSize>(
             name: Name,
-        ) -> Result<SamplingPortSource<MSG_SIZE, Self>, Error>;
+        ) -> Result<ConstSamplingPortSource<MSG_SIZE, Self>, Error>;
 
         /// Returns Err(Error::InvalidConfig) if sampling port with name does not exists or
         /// if the message size of the found sampling port is different than MSG_SIZE
-        fn get_sampling_port_destination<const MSG_SIZE: MessageSize>(
+        fn get_const_sampling_port_destination<const MSG_SIZE: MessageSize>(
             name: Name,
-        ) -> Result<SamplingPortDestination<MSG_SIZE, Self>, Error>;
+        ) -> Result<ConstSamplingPortDestination<MSG_SIZE, Self>, Error>;
     }
 
     impl<S: ApexSamplingPortP4> ApexSamplingPortP4Ext for S {
@@ -182,9 +182,9 @@ pub mod abstraction {
     impl<S: ApexSamplingPortP1> ApexSamplingPortP1Ext for S {
         /// Returns Err(Error::InvalidConfig) if sampling port with name does not exists or
         /// if the message size of the found sampling port is different than MSG_SIZE
-        fn get_sampling_port_source<const MSG_SIZE: MessageSize>(
+        fn get_const_sampling_port_source<const MSG_SIZE: MessageSize>(
             name: Name,
-        ) -> Result<SamplingPortSource<MSG_SIZE, Self>, Error> {
+        ) -> Result<ConstSamplingPortSource<MSG_SIZE, Self>, Error> {
             let id = S::get_sampling_port_id(name.into())?;
             // According to ARINC653P1-5 3.6.2.1.5 this can only fail if the sampling_port_id
             //  does not exist in the current partition.
@@ -205,7 +205,7 @@ pub mod abstraction {
                 return Err(Error::InvalidConfig);
             }
 
-            Ok(SamplingPortSource {
+            Ok(ConstSamplingPortSource {
                 _b: Default::default(),
                 id,
             })
@@ -213,9 +213,9 @@ pub mod abstraction {
 
         /// Returns Err(Error::InvalidConfig) if sampling port with name does not exists or
         /// if the message size of the found sampling port is different than MSG_SIZE
-        fn get_sampling_port_destination<const MSG_SIZE: MessageSize>(
+        fn get_const_sampling_port_destination<const MSG_SIZE: MessageSize>(
             name: Name,
-        ) -> Result<SamplingPortDestination<MSG_SIZE, Self>, Error> {
+        ) -> Result<ConstSamplingPortDestination<MSG_SIZE, Self>, Error> {
             let id = S::get_sampling_port_id(name.into())?;
             // According to ARINC653P1-5 3.6.2.1.5 this can only fail if the sampling_port_id
             //  does not exist in the current partition.
@@ -236,7 +236,7 @@ pub mod abstraction {
                 return Err(Error::InvalidConfig);
             }
 
-            Ok(SamplingPortDestination {
+            Ok(ConstSamplingPortDestination {
                 _b: Default::default(),
                 id,
                 // According to ARINC653P1-5 3.6.2.1.1 the refresh_period defined during
@@ -246,7 +246,7 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> SamplingPortSource<MSG_SIZE, S> {
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> ConstSamplingPortSource<MSG_SIZE, S> {
         pub fn send(&self, buffer: &[ApexByte]) -> Result<(), Error> {
             buffer.validate_write(MSG_SIZE)?;
             S::sampling_port_send_unchecked(self.id, buffer)
@@ -261,9 +261,9 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP1Ext> SamplingPortSource<MSG_SIZE, S> {
-        pub fn from_name(name: Name) -> Result<SamplingPortSource<MSG_SIZE, S>, Error> {
-            S::get_sampling_port_source(name)
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP1Ext> ConstSamplingPortSource<MSG_SIZE, S> {
+        pub fn from_name(name: Name) -> Result<ConstSamplingPortSource<MSG_SIZE, S>, Error> {
+            S::get_const_sampling_port_source(name)
         }
 
         pub fn status(&self) -> SamplingPortStatus {
@@ -275,7 +275,9 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext> SamplingPortDestination<MSG_SIZE, S> {
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP4Ext>
+        ConstSamplingPortDestination<MSG_SIZE, S>
+    {
         pub fn receive<'a>(
             &self,
             buffer: &'a mut [ApexByte],
@@ -297,9 +299,11 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP1Ext> SamplingPortDestination<MSG_SIZE, S> {
-        pub fn from_name(name: Name) -> Result<SamplingPortDestination<MSG_SIZE, S>, Error> {
-            S::get_sampling_port_destination(name)
+    impl<const MSG_SIZE: MessageSize, S: ApexSamplingPortP1Ext>
+        ConstSamplingPortDestination<MSG_SIZE, S>
+    {
+        pub fn from_name(name: Name) -> Result<ConstSamplingPortDestination<MSG_SIZE, S>, Error> {
+            S::get_const_sampling_port_destination(name)
         }
 
         pub fn status(&self) -> SamplingPortStatus {
@@ -312,10 +316,10 @@ pub mod abstraction {
     }
 
     impl<S: ApexSamplingPortP4Ext> StartContext<S> {
-        pub fn create_sampling_port_source<const MSG_SIZE: MessageSize>(
+        pub fn create_const_sampling_port_source<const MSG_SIZE: MessageSize>(
             &mut self,
             name: Name,
-        ) -> Result<SamplingPortSource<MSG_SIZE, S>, Error> {
+        ) -> Result<ConstSamplingPortSource<MSG_SIZE, S>, Error> {
             let id = S::create_sampling_port(
                 name.into(),
                 MSG_SIZE,
@@ -325,23 +329,23 @@ pub mod abstraction {
                 //  it may produce an error if set to zero
                 SystemTime::Normal(Duration::from_nanos(1)).into(),
             )?;
-            Ok(SamplingPortSource {
+            Ok(ConstSamplingPortSource {
                 _b: Default::default(),
                 id,
             })
         }
-        pub fn create_sampling_port_destination<const MSG_SIZE: MessageSize>(
+        pub fn create_const_sampling_port_destination<const MSG_SIZE: MessageSize>(
             &mut self,
             name: Name,
             refresh: Duration,
-        ) -> Result<SamplingPortDestination<MSG_SIZE, S>, Error> {
+        ) -> Result<ConstSamplingPortDestination<MSG_SIZE, S>, Error> {
             let id = S::create_sampling_port(
                 name.into(),
                 MSG_SIZE,
                 PortDirection::Destination,
                 SystemTime::Normal(refresh).into(),
             )?;
-            Ok(SamplingPortDestination {
+            Ok(ConstSamplingPortDestination {
                 _b: Default::default(),
                 id,
                 refresh,
