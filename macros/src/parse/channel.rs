@@ -173,12 +173,12 @@ impl Channel {
             Channel::QueuingOut(_, q) => {
                 let size = q.msg_size.bytes() as u32;
                 let count = q.msg_count as u32;
-                parse_quote!(QueuingPortSender::< #size , #count , Hypervisor>)
+                parse_quote!(ConstQueuingPortSender::< #size , #count , Hypervisor>)
             }
             Channel::QueuingIn(_, q) => {
                 let size = q.msg_size.bytes() as u32;
                 let count = q.msg_count as u32;
-                parse_quote!(QueuingPortReceiver::< #size , #count , Hypervisor>)
+                parse_quote!(ConstQueuingPortReceiver::< #size , #count , Hypervisor>)
             }
         }
     }

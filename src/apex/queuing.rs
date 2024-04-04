@@ -78,7 +78,7 @@ pub mod abstraction {
     use crate::prelude::*;
 
     #[derive(Debug)]
-    pub struct QueuingPortSender<
+    pub struct ConstQueuingPortSender<
         const MSG_SIZE: MessageSize,
         const NB_MSGS: MessageRange,
         Q: ApexQueuingPortP4Ext,
@@ -88,7 +88,7 @@ pub mod abstraction {
     }
 
     impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext> Clone
-        for QueuingPortSender<MSG_SIZE, NB_MSGS, S>
+        for ConstQueuingPortSender<MSG_SIZE, NB_MSGS, S>
     {
         fn clone(&self) -> Self {
             Self {
@@ -99,7 +99,7 @@ pub mod abstraction {
     }
 
     #[derive(Debug)]
-    pub struct QueuingPortReceiver<
+    pub struct ConstQueuingPortReceiver<
         const MSG_SIZE: MessageSize,
         const NB_MSGS: MessageRange,
         Q: ApexQueuingPortP4Ext,
@@ -109,7 +109,7 @@ pub mod abstraction {
     }
 
     impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext> Clone
-        for QueuingPortReceiver<MSG_SIZE, NB_MSGS, S>
+        for ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, S>
     {
         fn clone(&self) -> Self {
             Self {
@@ -140,16 +140,19 @@ pub mod abstraction {
         /// Returns Err(Error::InvalidConfig) if queuing port with name does not exists or
         /// if the message size of the found queuing port is different than MSG_SIZE or
         /// if number messages of found queuing port is different than NB_MSGS
-        fn get_queuing_port_sender<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange>(
+        fn get_const_queuing_port_sender<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange>(
             name: Name,
-        ) -> Result<QueuingPortSender<MSG_SIZE, NB_MSGS, Self>, Error>;
+        ) -> Result<ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Self>, Error>;
 
         /// Returns Err(Error::InvalidConfig) if queuing port with name does not exists or
         /// if the message size of the found queuing port is different than MSG_SIZE or
         /// if number messages of found queuing port is different than NB_MSGS
-        fn get_queuing_port_receiver<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange>(
+        fn get_const_queuing_port_receiver<
+            const MSG_SIZE: MessageSize,
+            const NB_MSGS: MessageRange,
+        >(
             name: Name,
-        ) -> Result<QueuingPortReceiver<MSG_SIZE, NB_MSGS, Self>, Error>;
+        ) -> Result<ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Self>, Error>;
     }
 
     impl<Q: ApexQueuingPortP4> ApexQueuingPortP4Ext for Q {
@@ -176,9 +179,12 @@ pub mod abstraction {
         /// Returns Err(Error::InvalidConfig) if queuing port with name does not exists or
         /// if the message size of the found queuing port is different than MSG_SIZE or
         /// if number messages of found queuing port is different than NB_MSGS
-        fn get_queuing_port_sender<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange>(
+        fn get_const_queuing_port_sender<
+            const MSG_SIZE: MessageSize,
+            const NB_MSGS: MessageRange,
+        >(
             name: Name,
-        ) -> Result<QueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
+        ) -> Result<ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
             let id = Q::get_queuing_port_id(name.into())?;
             // According to ARINC653P1-5 3.6.2.2.5 this can only fail if the queuing_port_id
             //  does not exist in the current partition.
@@ -203,7 +209,7 @@ pub mod abstraction {
                 return Err(Error::InvalidConfig);
             }
 
-            Ok(QueuingPortSender {
+            Ok(ConstQueuingPortSender {
                 _b: Default::default(),
                 id,
             })
@@ -212,9 +218,12 @@ pub mod abstraction {
         /// Returns Err(Error::InvalidConfig) if queuing port with name does not exists or
         /// if the message size of the found queuing port is different than MSG_SIZE or
         /// if number messages of found queuing port is different than NB_MSGS
-        fn get_queuing_port_receiver<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange>(
+        fn get_const_queuing_port_receiver<
+            const MSG_SIZE: MessageSize,
+            const NB_MSGS: MessageRange,
+        >(
             name: Name,
-        ) -> Result<QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
+        ) -> Result<ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
             let id = Q::get_queuing_port_id(name.into())?;
             // According to ARINC653P1-5 3.6.2.2.5 this can only fail if the queuing_port_id
             //  does not exist in the current partition.
@@ -239,7 +248,7 @@ pub mod abstraction {
                 return Err(Error::InvalidConfig);
             }
 
-            Ok(QueuingPortReceiver {
+            Ok(ConstQueuingPortReceiver {
                 _b: Default::default(),
                 id,
             })
@@ -247,7 +256,7 @@ pub mod abstraction {
     }
 
     impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
-        QueuingPortSender<MSG_SIZE, NB_MSGS, Q>
+        ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>
     {
         pub fn send(&self, buffer: &[ApexByte], timeout: SystemTime) -> Result<(), Error> {
             buffer.validate_write(MSG_SIZE)?;
@@ -276,15 +285,17 @@ pub mod abstraction {
     }
 
     impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP1Ext>
-        QueuingPortSender<MSG_SIZE, NB_MSGS, Q>
+        ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>
     {
-        pub fn from_name(name: Name) -> Result<QueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
-            Q::get_queuing_port_sender(name)
+        pub fn from_name(
+            name: Name,
+        ) -> Result<ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
+            Q::get_const_queuing_port_sender(name)
         }
     }
 
     impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
-        QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>
+        ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>
     {
         pub fn receive<'a>(
             &self,
@@ -326,39 +337,41 @@ pub mod abstraction {
     }
 
     impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP1Ext>
-        QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>
+        ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>
     {
-        pub fn from_name(name: Name) -> Result<QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
-            Q::get_queuing_port_receiver(name)
+        pub fn from_name(
+            name: Name,
+        ) -> Result<ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
+            Q::get_const_queuing_port_receiver(name)
         }
     }
 
     impl<Q: ApexQueuingPortP4Ext> StartContext<Q> {
-        pub fn create_queuing_port_sender<
+        pub fn create_const_queuing_port_sender<
             const MSG_SIZE: MessageSize,
             const NB_MSGS: MessageRange,
         >(
             &mut self,
             name: Name,
             qd: QueuingDiscipline,
-        ) -> Result<QueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
+        ) -> Result<ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>, Error> {
             let id =
                 Q::create_queuing_port(name.into(), MSG_SIZE, NB_MSGS, PortDirection::Source, qd)?;
 
-            Ok(QueuingPortSender {
+            Ok(ConstQueuingPortSender {
                 _b: Default::default(),
                 id,
             })
         }
 
-        pub fn create_queuing_port_receiver<
+        pub fn create_const_queuing_port_receiver<
             const MSG_SIZE: MessageSize,
             const NB_MSGS: MessageRange,
         >(
             &mut self,
             name: Name,
             qd: QueuingDiscipline,
-        ) -> Result<QueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
+        ) -> Result<ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>, Error> {
             let id = Q::create_queuing_port(
                 name.into(),
                 MSG_SIZE,
@@ -367,7 +380,7 @@ pub mod abstraction {
                 qd,
             )?;
 
-            Ok(QueuingPortReceiver {
+            Ok(ConstQueuingPortReceiver {
                 _b: Default::default(),
                 id,
             })
