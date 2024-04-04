@@ -58,11 +58,11 @@ impl Channel {
             }
             Channel::QueuingOut(_, ch) => {
                 let disc: Path = ch.discipline.into();
-                parse_quote!(create_queuing_port_sender(NAME, #disc))
+                parse_quote!(create_const_queuing_port_sender(NAME, #disc))
             }
             Channel::QueuingIn(_, ch) => {
                 let disc: Path = ch.discipline.into();
-                parse_quote!(create_queuing_port_receiver(NAME, #disc))
+                parse_quote!(create_const_queuing_port_receiver(NAME, #disc))
             }
         }
     }
