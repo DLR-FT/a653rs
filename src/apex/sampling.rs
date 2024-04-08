@@ -374,7 +374,7 @@ pub mod abstraction {
             S::sampling_port_send_unchecked(self.id, buffer)
         }
 
-        pub fn id(&self) -> SamplingPortId {
+        pub const fn id(&self) -> SamplingPortId {
             self.id
         }
 
@@ -406,7 +406,7 @@ pub mod abstraction {
             unsafe { S::sampling_port_receive_unchecked(self.id, buffer) }
         }
 
-        pub fn id(&self) -> SamplingPortId {
+        pub const fn id(&self) -> SamplingPortId {
             self.id
         }
 
@@ -414,7 +414,7 @@ pub mod abstraction {
             self.msg_size
         }
 
-        pub fn refresh_period(&self) -> Duration {
+        pub const fn refresh_period(&self) -> Duration {
             self.refresh
         }
     }
