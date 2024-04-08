@@ -373,7 +373,7 @@ pub mod abstraction {
             Q::queueing_port_send_unchecked(self.id, buffer, timeout)
         }
 
-        pub fn id(&self) -> QueuingPortId {
+        pub const fn id(&self) -> QueuingPortId {
             self.id
         }
 
@@ -419,7 +419,7 @@ pub mod abstraction {
             Q::clear_queuing_port(self.id).unwrap();
         }
 
-        pub fn id(&self) -> QueuingPortId {
+        pub const fn id(&self) -> QueuingPortId {
             self.id
         }
 
