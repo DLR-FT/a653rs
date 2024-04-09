@@ -19,6 +19,9 @@ mod hello {
     #[queuing_out(msg_count = 20, msg_size = "12KB", discipline = "FIFO")]
     struct Channel3;
 
+    #[queuing_in(msg_count = 10, msg_size = "2MB", discipline = "Priority")]
+    struct ChannelFour;
+
     #[start(cold)]
     fn cold_start(ctx: start::Context) {
         warm_start(ctx);
