@@ -96,28 +96,28 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext>
-        AsRef<QueuingPortSender<S>> for ConstQueuingPortSender<MSG_SIZE, NB_MSGS, S>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
+        AsRef<QueuingPortSender<Q>> for ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>
     {
-        fn as_ref(&self) -> &QueuingPortSender<S> {
+        fn as_ref(&self) -> &QueuingPortSender<Q> {
             &self.0
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext>
-        Borrow<QueuingPortSender<S>> for ConstQueuingPortSender<MSG_SIZE, NB_MSGS, S>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
+        Borrow<QueuingPortSender<Q>> for ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>
     {
-        fn borrow(&self) -> &QueuingPortSender<S> {
+        fn borrow(&self) -> &QueuingPortSender<Q> {
             &self.0
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext>
-        TryFrom<QueuingPortSender<S>> for ConstQueuingPortSender<MSG_SIZE, NB_MSGS, S>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
+        TryFrom<QueuingPortSender<Q>> for ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>
     {
         type Error = Error;
 
-        fn try_from(port: QueuingPortSender<S>) -> Result<Self, Self::Error> {
+        fn try_from(port: QueuingPortSender<Q>) -> Result<Self, Self::Error> {
             if port.msg_size != MSG_SIZE || port.nb_msgs != NB_MSGS {
                 return Err(Error::InvalidConfig);
             }
@@ -143,28 +143,28 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext>
-        AsRef<QueuingPortReceiver<S>> for ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, S>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
+        AsRef<QueuingPortReceiver<Q>> for ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>
     {
-        fn as_ref(&self) -> &QueuingPortReceiver<S> {
+        fn as_ref(&self) -> &QueuingPortReceiver<Q> {
             &self.0
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext>
-        Borrow<QueuingPortReceiver<S>> for ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, S>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
+        Borrow<QueuingPortReceiver<Q>> for ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>
     {
-        fn borrow(&self) -> &QueuingPortReceiver<S> {
+        fn borrow(&self) -> &QueuingPortReceiver<Q> {
             &self.0
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext>
-        TryFrom<QueuingPortReceiver<S>> for ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, S>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
+        TryFrom<QueuingPortReceiver<Q>> for ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>
     {
         type Error = Error;
 
-        fn try_from(port: QueuingPortReceiver<S>) -> Result<Self, Self::Error> {
+        fn try_from(port: QueuingPortReceiver<Q>) -> Result<Self, Self::Error> {
             if port.msg_size != MSG_SIZE || port.nb_msgs != NB_MSGS {
                 return Err(Error::InvalidConfig);
             }
@@ -181,7 +181,7 @@ pub mod abstraction {
         nb_msgs: MessageRange,
     }
 
-    impl<S: ApexQueuingPortP4Ext> Clone for QueuingPortSender<S> {
+    impl<Q: ApexQueuingPortP4Ext> Clone for QueuingPortSender<Q> {
         fn clone(&self) -> Self {
             Self {
                 _b: self._b,
@@ -192,10 +192,10 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext>
-        From<ConstQueuingPortSender<MSG_SIZE, NB_MSGS, S>> for QueuingPortSender<S>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
+        From<ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>> for QueuingPortSender<Q>
     {
-        fn from(port: ConstQueuingPortSender<MSG_SIZE, NB_MSGS, S>) -> Self {
+        fn from(port: ConstQueuingPortSender<MSG_SIZE, NB_MSGS, Q>) -> Self {
             port.0
         }
     }
@@ -208,7 +208,7 @@ pub mod abstraction {
         nb_msgs: MessageRange,
     }
 
-    impl<S: ApexQueuingPortP4Ext> Clone for QueuingPortReceiver<S> {
+    impl<Q: ApexQueuingPortP4Ext> Clone for QueuingPortReceiver<Q> {
         fn clone(&self) -> Self {
             Self {
                 _b: self._b,
@@ -219,10 +219,10 @@ pub mod abstraction {
         }
     }
 
-    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, S: ApexQueuingPortP4Ext>
-        From<ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, S>> for QueuingPortReceiver<S>
+    impl<const MSG_SIZE: MessageSize, const NB_MSGS: MessageRange, Q: ApexQueuingPortP4Ext>
+        From<ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>> for QueuingPortReceiver<Q>
     {
-        fn from(port: ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, S>) -> Self {
+        fn from(port: ConstQueuingPortReceiver<MSG_SIZE, NB_MSGS, Q>) -> Self {
             port.0
         }
     }
