@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::str::FromStr;
 
 use darling::{FromAttributes, FromMeta};
@@ -29,9 +30,9 @@ impl FromMeta for ApexName {
     }
 }
 
-impl ToString for ApexName {
-    fn to_string(&self) -> String {
-        self.0.clone()
+impl Display for ApexName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0)
     }
 }
 

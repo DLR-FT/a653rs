@@ -1,9 +1,9 @@
 //! Abstraction layer for the ARINC653 P1/P2/P4 API
 
 #![no_std]
-#![warn(clippy::missing_crate_level_docs)]
 #![warn(clippy::missing_errors_doc)]
 #![warn(clippy::missing_panics_doc)]
+#![warn(rustdoc::missing_crate_level_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
 /// Bindings to traits which are supposed to be implemented for ARINC653 compliant hypervisors
