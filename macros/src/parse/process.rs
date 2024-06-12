@@ -4,7 +4,7 @@ use std::string::ToString;
 use bytesize::ByteSize;
 use darling::{FromAttributes, FromMeta};
 use quote::format_ident;
-use strum::{Display, EnumString, EnumVariantNames, VariantNames};
+use strum::{Display, EnumString, VariantNames};
 use syn::spanned::Spanned;
 use syn::{Attribute, Ident, Item};
 
@@ -36,7 +36,7 @@ impl FromMeta for SystemTime {
     }
 }
 
-#[derive(Debug, Clone, Copy, Display, EnumString, EnumVariantNames)]
+#[derive(Debug, Clone, Copy, Display, EnumString, VariantNames)]
 #[strum(ascii_case_insensitive)]
 pub enum Deadline {
     Soft,
