@@ -13,7 +13,7 @@ use crate::parse::util::{
     MayFromAttributes, WrappedByteSize, WrappedDuration,
 };
 
-#[derive(Debug, Clone, Display)]
+#[derive(Debug, Copy, Clone, Display)]
 pub enum SystemTime {
     Infinite,
     Normal(WrappedDuration),
