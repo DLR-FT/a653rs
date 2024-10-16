@@ -208,6 +208,17 @@ mod partition;
 /// - The identifier of the functions can be anything
 /// - The identifier of the `Context` can be anything
 ///
+/// ## Constants
+///
+/// Inside the module of each process (named after the process in snake_case) there are some convenience constants.
+///
+/// - NAME: `a653rs::prelude::Name`
+/// - TIME_CAPACITY: `a653rs::prelude::SystemTime`
+/// - PERIOD: `a653rs::prelude::SystemTime`
+/// - STACK_SIZE: `a653rs::prelude::StackSize`
+/// - BASE_PRIORITY: `a653rs::prelude::Priority`
+/// - DEADLINE: `a653rs::prelude::Deadline`
+///
 /// ## Example
 /// ```no_run
 /// # use a653rs::prelude::PartitionExt;
@@ -301,6 +312,16 @@ mod partition;
 /// ## Flexibility
 ///
 /// - The identifier of the struct can be anything
+///
+/// ## Constants
+///
+/// Inside the module of each channel (named after the channel in snake_case) there are some convenience constants.
+///
+/// - NAME: `a653rs::prelude::Name`
+/// - MSG_SIZE: `a653rs::prelude::MessageSize`
+/// - (QueuingPorts only) NB_MSGS: `a653rs::prelude::MessageRange`
+/// - (QueuingPorts only) DISCIPLINE: `a653rs::prelude::QueuingDiscipline`
+/// - (SamplingPort in only) REFRESH_PERIOD: `core::time::Duration`
 ///
 /// ## Example
 /// ```no_run
