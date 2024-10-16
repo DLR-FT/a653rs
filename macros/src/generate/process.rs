@@ -1,7 +1,6 @@
-use proc_macro2::TokenStream;
 use quote::format_ident;
 use syn::{
-    parse_quote, ExprPath, ItemConst, ItemFn, ItemImpl, ItemMod, ItemStatic, LitByteStr, LitStr,
+    parse_quote, Expr, ItemConst, ItemFn, ItemImpl, ItemMod, ItemStatic, LitByteStr, LitStr, Path,
 };
 
 use super::context::Context;
@@ -24,22 +23,17 @@ impl Process {
 
     pub fn gen_create_fn(&self) -> ItemImpl {
         let create_ident = format_ident!("create_{}", self.ident);
-        let deadline: ExprPath = self.deadline.into();
-        let priority = self.base_priority;
-        let stack_size = self.stack_size.as_u64() as u32;
-        let time_capacity: TokenStream = self.time_capacity.clone().into();
-        let period: TokenStream = self.period.clone().into();
         parse_quote! {
             impl<'a> super:: StartContext<'a, Hypervisor> {
                 pub fn #create_ident<'b>(&'b mut self) -> Result<&'b Process::<Hypervisor>, Error>{
                     use core::str::FromStr;
                     let attr =  ProcessAttribute {
-                        period: #period,
-                        time_capacity: #time_capacity,
+                        period: PERIOD,
+                        time_capacity: TIME_CAPACITY,
                         entry_point: wrapper,
-                        stack_size: #stack_size,
-                        base_priority: #priority,
-                        deadline: #deadline,
+                        stack_size: STACK_SIZE,
+                        base_priority: BASE_PRIORITY,
+                        deadline: DEADLINE,
                         name: NAME,
                     };
                     let process = self.ctx.create_process(attr)?;
@@ -59,7 +53,18 @@ impl Process {
         }
     }
 
-    pub fn gen_static_name(&self) -> syn::Result<ItemConst> {
+    pub fn gen_consts(&self) -> syn::Result<Vec<ItemConst>> {
+        Ok(vec![
+            self.gen_const_name()?,
+            self.gen_const_time_capacity(),
+            self.gen_const_period(),
+            self.gen_const_stack_size(),
+            self.gen_const_base_priority(),
+            self.gen_const_deadline(),
+        ])
+    }
+
+    pub fn gen_const_name(&self) -> syn::Result<ItemConst> {
         const LEN: usize = 32;
         let name = self.name.to_string();
         let len = name.bytes().len();
@@ -79,10 +84,45 @@ impl Process {
         })
     }
 
+    pub fn gen_const_time_capacity(&self) -> ItemConst {
+        let time_capacity: Expr = self.time_capacity.into();
+        parse_quote! {
+             pub(super) const TIME_CAPACITY: SystemTime = #time_capacity ;
+        }
+    }
+
+    pub fn gen_const_period(&self) -> ItemConst {
+        let period: Expr = self.period.into();
+        parse_quote! {
+             pub(super) const PERIOD: SystemTime = #period ;
+        }
+    }
+
+    pub fn gen_const_stack_size(&self) -> ItemConst {
+        let stack_size = self.stack_size.as_u64() as u32;
+        parse_quote! {
+             pub(super) const STACK_SIZE: StackSize = #stack_size ;
+        }
+    }
+
+    pub fn gen_const_base_priority(&self) -> ItemConst {
+        let base_priority = self.base_priority;
+        parse_quote! {
+             pub(super) const BASE_PRIORITY: Priority = #base_priority ;
+        }
+    }
+
+    pub fn gen_const_deadline(&self) -> ItemConst {
+        let deadline: Path = self.deadline.into();
+        parse_quote! {
+             pub(super) const DEADLINE: Deadline = #deadline ;
+        }
+    }
+
     pub fn gen_process_mod(&self) -> syn::Result<ItemMod> {
         let ident = &self.ident;
         let wrapper = self.gen_wrapper_fn();
-        let static_name = self.gen_static_name()?;
+        let consts = self.gen_consts()?;
         let static_value = self.gen_static_value();
         let create_fn = self.gen_create_fn();
         let context_ident = Context::from_process(self).get_context_ident();
@@ -95,7 +135,7 @@ impl Process {
 
                 #wrapper
                 #create_fn
-                #static_name
+                #(#consts)*
                 #static_value
             }
         })

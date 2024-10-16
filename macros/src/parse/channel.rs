@@ -1,5 +1,6 @@
 use std::fmt::Display;
 use std::str::FromStr;
+use std::time::Duration;
 
 use darling::{FromAttributes, FromMeta};
 use proc_macro2::Ident;
@@ -95,7 +96,7 @@ pub struct QueuingOutProc {
     #[darling(default = "ApexName::default")]
     pub name: ApexName,
     pub msg_size: WrappedByteSize,
-    pub msg_count: usize,
+    pub msg_count: u32,
     pub discipline: QueuingDiscipline,
 }
 
@@ -116,7 +117,7 @@ pub struct QueuingInProc {
     #[darling(default = "ApexName::default")]
     pub name: ApexName,
     pub msg_size: WrappedByteSize,
-    pub msg_count: usize,
+    pub msg_count: u32,
     pub discipline: QueuingDiscipline,
 }
 
@@ -161,6 +162,38 @@ impl Channel {
         .clone()
     }
 
+    pub fn msg_size(&self) -> u64 {
+        match self {
+            Channel::SamplingOut(_ident, ch) => ch.msg_size.bytes(),
+            Channel::SamplingIn(_ident, ch) => ch.msg_size.bytes(),
+            Channel::QueuingOut(_ident, ch) => ch.msg_size.bytes(),
+            Channel::QueuingIn(_ident, ch) => ch.msg_size.bytes(),
+        }
+    }
+
+    pub fn msg_count(&self) -> Option<u32> {
+        match self {
+            Channel::QueuingOut(_ident, ch) => Some(ch.msg_count),
+            Channel::QueuingIn(_ident, ch) => Some(ch.msg_count),
+            _ => None,
+        }
+    }
+
+    pub fn discipline(&self) -> Option<QueuingDiscipline> {
+        match self {
+            Channel::QueuingOut(_ident, ch) => Some(ch.discipline),
+            Channel::QueuingIn(_ident, ch) => Some(ch.discipline),
+            _ => None,
+        }
+    }
+
+    pub fn refresh_period(&self) -> Option<Duration> {
+        if let Channel::SamplingIn(_ident, ch) = self {
+            return Some(ch.refresh_period.into());
+        }
+        None
+    }
+
     pub fn typ(&self) -> Type {
         match self {
             Channel::SamplingOut(_, s) => {
@@ -173,12 +206,12 @@ impl Channel {
             }
             Channel::QueuingOut(_, q) => {
                 let size = q.msg_size.bytes() as u32;
-                let count = q.msg_count as u32;
+                let count = q.msg_count;
                 parse_quote!(ConstQueuingPortSender::< #size , #count , Hypervisor>)
             }
             Channel::QueuingIn(_, q) => {
                 let size = q.msg_size.bytes() as u32;
-                let count = q.msg_count as u32;
+                let count = q.msg_count;
                 parse_quote!(ConstQueuingPortReceiver::< #size , #count , Hypervisor>)
             }
         }

@@ -1,10 +1,8 @@
-use std::time::Duration;
-
 use convert_case::{Case, Casing};
 use quote::format_ident;
 use syn::{
-    parse_quote, Expr, ExprCall, Ident, ItemConst, ItemImpl, ItemMod, ItemStatic, LitByteStr,
-    LitStr, Path,
+    parse_quote, ExprCall, Ident, ItemConst, ItemImpl, ItemMod, ItemStatic, LitByteStr, LitStr,
+    Path,
 };
 
 use crate::parse::channel::Channel;
@@ -50,24 +48,33 @@ impl Channel {
             Channel::SamplingOut(_, _) => {
                 parse_quote!(create_const_sampling_port_source(NAME))
             }
-            Channel::SamplingIn(_, ch) => {
-                let dur: Duration = ch.refresh_period.into();
-                let dur = dur.as_nanos() as u64;
-                let dur: Expr = parse_quote!(core::time::Duration::from_nanos(#dur));
-                parse_quote!(create_const_sampling_port_destination(NAME, #dur))
+            Channel::SamplingIn(_, _) => {
+                parse_quote!(create_const_sampling_port_destination(NAME, REFRESH_PERIOD))
             }
-            Channel::QueuingOut(_, ch) => {
-                let disc: Path = ch.discipline.into();
-                parse_quote!(create_const_queuing_port_sender(NAME, #disc))
+            Channel::QueuingOut(_, _) => {
+                parse_quote!(create_const_queuing_port_sender(NAME, DISCIPLINE))
             }
-            Channel::QueuingIn(_, ch) => {
-                let disc: Path = ch.discipline.into();
-                parse_quote!(create_const_queuing_port_receiver(NAME, #disc))
+            Channel::QueuingIn(_, _) => {
+                parse_quote!(create_const_queuing_port_receiver(NAME, DISCIPLINE))
             }
         }
     }
 
-    pub fn gen_static_name(&self) -> syn::Result<ItemConst> {
+    pub fn gen_consts(&self) -> syn::Result<Vec<ItemConst>> {
+        let mut consts = vec![self.gen_const_name()?, self.gen_const_msg_size()];
+        if let Some(msg_count) = self.gen_const_msg_count() {
+            consts.push(msg_count);
+        }
+        if let Some(discipline) = self.gen_const_discipline() {
+            consts.push(discipline);
+        }
+        if let Some(refresh_period) = self.gen_const_refresh_period() {
+            consts.push(refresh_period);
+        }
+        Ok(consts)
+    }
+
+    pub fn gen_const_name(&self) -> syn::Result<ItemConst> {
         const LEN: usize = 32;
         let name = self.name().to_string();
         let len = name.bytes().len();
@@ -87,9 +94,40 @@ impl Channel {
         })
     }
 
+    pub fn gen_const_msg_size(&self) -> ItemConst {
+        let msg_size = self.msg_size() as u32;
+        parse_quote! {
+             pub(super) const MSG_SIZE: MessageSize = #msg_size;
+        }
+    }
+
+    pub fn gen_const_msg_count(&self) -> Option<ItemConst> {
+        let msg_count = self.msg_count()?;
+        Some(parse_quote! {
+             pub(super) const NB_MSGS: MessageRange = #msg_count;
+        })
+    }
+
+    pub fn gen_const_discipline(&self) -> Option<ItemConst> {
+        let discipline: Path = self.discipline()?.into();
+        Some(parse_quote! {
+             pub(super) const DISCIPLINE: QueuingDiscipline = #discipline;
+        })
+    }
+
+    pub fn gen_const_refresh_period(&self) -> Option<ItemConst> {
+        let refresh_period = self.refresh_period()?;
+        let secs = refresh_period.as_secs();
+        let nanos = refresh_period.subsec_nanos();
+        Some(parse_quote! {
+             pub(super) const REFRESH_PERIOD: core::time::Duration =
+                 core::time::Duration::new( #secs , #nanos );
+        })
+    }
+
     pub fn gen_channel_mod(&self) -> syn::Result<ItemMod> {
         let name = self.gen_snake_ident();
-        let static_name = self.gen_static_name()?;
+        let consts = self.gen_consts()?;
         let static_value = self.gen_static_value();
         let create_fn = self.gen_create_fn();
         Ok(parse_quote! {
@@ -98,7 +136,7 @@ impl Channel {
                 use a653rs::prelude::*;
 
                 #create_fn
-                #static_name
+                #(#consts)*
                 #static_value
             }
         })
