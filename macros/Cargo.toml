@@ -17,11 +17,11 @@ proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "2.0", features = [ "full" ] }
 static_assertions = "1.1"
-bytesize = "1.3"
-strum = { version = "0.26", features = ["derive"] }
-darling = "0.20"
-itertools = "0.13"
-convert_case = "0.6"
+bytesize = "2.3"
+strum = { version = "0.27", features = ["derive"] }
+darling = "0.23"
+itertools = "0.14"
+convert_case = "0.10"
 humantime = "2.1"
 
 [dev-dependencies]
